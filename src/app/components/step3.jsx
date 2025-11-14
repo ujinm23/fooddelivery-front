@@ -2,24 +2,21 @@
 
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";        // ← IMPORT MUST BE HERE
+import { Button } from "@/components/ui/button";
 import BackButton from "./BackButton";
 
-export function Step3({ increaseStep, reduceStep }) {  
-      const [email, setEmail] = useState("");
+export function Step3({ increaseStep, reduceStep }) {
+  const [email, setEmail] = useState("");
   const [touched, setTouched] = useState(false);
 
   const validEmail = /^\S+@\S+\.\S+$/.test(email);
 
-    return(
-        <div className="flex h-screen overflow-hidden">
-      
-      {/* LEFT SIDE — FORM */}
+  return (
+    <div className="flex h-screen overflow-hidden">
       <div className="flex items-center justify-center w-1/2">
         <div className="w-full max-w-[416px]">
-
           <div className="mb-6">
-            <BackButton />
+            <BackButton onClick={reduceStep} />{" "}
           </div>
 
           <div className="mb-6">
@@ -28,8 +25,6 @@ export function Step3({ increaseStep, reduceStep }) {
               Sign up to explore your favorite dishes.
             </p>
           </div>
-
-         
 
           {/* <div className="h-5 mb-4">
             {!validEmail && touched && (
@@ -41,14 +36,16 @@ export function Step3({ increaseStep, reduceStep }) {
 
           {/* BUTTON */}
           <Button
-            onClick={increaseStep}   // ← HERE
+            onClick={increaseStep} // ← HERE
             disabled={!validEmail}
-            className={`w-[416px] h-[36px] mb-6 
-              ${validEmail
-                ? "bg-[#18181B] text-white"
-                : "bg-gray-300 text-gray-500 cursor-not-allowed"}`}
+            className={`w-[416px] h-9 mb-6 
+              ${
+                validEmail
+                  ? "bg-[#18181B] text-white"
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              }`}
           >
-            Let's Go
+            Let&apos;s Go
           </Button>
 
           <p className="text-[#71717A] text-center">
@@ -67,6 +64,6 @@ export function Step3({ increaseStep, reduceStep }) {
         />
       </div>
     </div>
-    );
-};
+  );
+}
 export default Step3;

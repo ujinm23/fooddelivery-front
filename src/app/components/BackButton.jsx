@@ -1,9 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 
-export default function BackButton() {
+export default function BackButton({ onClick }) {
   return (
     <Button
+      onClick={onClick}
       variant="ghost"
       size="icon"
       className="rounded-xl border h-10 w-10"
