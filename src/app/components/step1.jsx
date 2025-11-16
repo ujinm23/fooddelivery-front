@@ -13,7 +13,7 @@ export default function Step1({ increaseStep }) {
   const validEmail = /^\S+@\S+\.\S+$/.test(email);
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-full overflow-hidden">
       <div className="flex items-center justify-center w-1/2">
         <div className="w-full max-w-[416px]">
           <div className="mb-6">
@@ -30,7 +30,7 @@ export default function Step1({ increaseStep }) {
           <div className="relative mb-2">
             <MailIcon
               className={`absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 
-              ${!validEmail && touched ? "text-red-500" : "text-[#71717A]"}`}
+              ${!validEmail && touched ? "text-red-300" : "text-[#71717A]"}`}
             />
 
             <Input
@@ -58,7 +58,7 @@ export default function Step1({ increaseStep }) {
           <Button
             onClick={increaseStep}
             disabled={!validEmail}
-            className={`w-[416px] h-9 mb-6 
+            className={`w-[416px] h-9 mb-6 cursor-pointer
               ${
                 validEmail
                   ? "bg-[#18181B] text-white"
@@ -75,7 +75,7 @@ export default function Step1({ increaseStep }) {
         </div>
       </div>
 
-      <div className="w-1/2 h-screen p-4 flex items-center justify-center">
+      <div className="w-1/2 h-screen p-4 ">
         <img
           src="/Delivery.svg"
           alt="auth illustration"
