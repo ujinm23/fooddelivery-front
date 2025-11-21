@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import BackButton from "./BackButton";
 import { MailIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { signUpApi } from "@/lib/api";
+import { signUpApi } from "@/lib/api"; // ← Email API-г эндээс дуудахаар байгаа
 
 export default function Step1({ increaseStep }) {
   const [email, setEmail] = useState("");
@@ -17,7 +17,22 @@ export default function Step1({ increaseStep }) {
   const handleNext = async () => {
     setError("");
 
-    increaseStep({ email });
+    try {
+      // 🔥 Зөвхөн email-г backend рүү илгээнэ
+      const res = await signUpApi.sendEmail({ email });
+
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.error || "Something went wrong");
+        return;
+      }
+
+      // Амжилттай бол Step2 рүү email-тай нь дамжуулна
+      increaseStep({ email });
+
+    } catch (err) {
+      setError("Server error. Try again.");
+    }
   };
 
   return (
@@ -68,8 +83,8 @@ export default function Step1({ increaseStep }) {
             onClick={handleNext}
             disabled={!validEmail}
             className={`w-[416px] h-9 mb-6 cursor-pointer
-    ${validEmail ? "bg-[#18181B] text-white" : "bg-gray-300 text-gray-500"}
-  `}
+              ${validEmail ? "bg-[#18181B] text-white" : "bg-gray-300 text-gray-500"}
+            `}
           >
             Let&apos;s Go
           </Button>

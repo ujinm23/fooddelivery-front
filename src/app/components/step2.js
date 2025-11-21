@@ -31,7 +31,7 @@ export default function Step2({ increaseStep, reduceStep, email }) {
   const handleFinishSignUp = async () => {
     setErrorMsg("");
 
-    const res = await signUpApi({
+    const res = await signUpApi.finishSignup({
       email,
       password,
     });
@@ -117,7 +117,9 @@ export default function Step2({ increaseStep, reduceStep, email }) {
             </label>
           </div>
 
-          {errorMsg && <p className="text-red-500 text-sm mb-2">{errorMsg}</p>}
+          {errorMsg && (
+            <p className="text-red-500 text-sm mb-2">{errorMsg}</p>
+          )}
 
           <Button
             onClick={handleFinishSignUp}

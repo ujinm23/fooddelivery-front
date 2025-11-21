@@ -1,9 +1,17 @@
-export async function signUpApi({ firstName, email, password }) {
-  const res = await fetch("http://localhost:999/api/auth/sign-up", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ firstName, email, password }),
-  });
+export const signUpApi = {
+  sendEmail: async ({ email }) => {
+    return fetch("/api/signup/email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+  },
 
-  return res.json();
-}
+  finishSignup: async ({ email, password }) => {
+    return fetch("/api/signup/password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    }).then((res) => res.json());
+  },
+};
