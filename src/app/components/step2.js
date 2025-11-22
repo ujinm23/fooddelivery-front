@@ -146,13 +146,13 @@ export default function Step2({ increaseStep, reduceStep, email }) {
         </div>
       </div>
 
-      <div className="w-1/2 h-full">
-        <img
-          src="/Delivery.svg"
-          className="w-full h-full object-cover"
-          alt="auth illustration"
-        />
-      </div>
+         <div className="w-1/2 h-full p-3 ">
+  <img
+    src="/Delivery.svg"
+    alt="auth illustration"
+    className="w-[2440px] h-full object-cover rounded-lg"
+  />
+</div>
     </div>
   );
 }

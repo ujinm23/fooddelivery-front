@@ -99,13 +99,13 @@ console.log("Step1 INCREASE email =", email);
         </div>
       </div>
 
-      <div className="w-1/2 h-screen p-4 ">
-        <img
-          src="/Delivery.svg"
-          alt="auth illustration"
-          className="w-full h-full object-cover rounded-lg"
-        />
-      </div>
+      <div className="w-1/2 h-full p-3 ">
+  <img
+    src="/Delivery.svg"
+    alt="auth illustration"
+    className="w-[2440px] h-full object-cover rounded-lg"
+  />
+</div>
     </div>
   );
 }
