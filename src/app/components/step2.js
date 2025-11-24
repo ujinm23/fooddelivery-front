@@ -28,7 +28,6 @@ export default function Step2({ increaseStep, reduceStep, email }) {
   const isValid = password.length >= 6 && password === confirm && hasSpecial;
   const error = touched && !isValid;
 
-  // ✅ ШИНЭ ЗӨВ SIGNUP CALL
   const handleFinishSignUp = async () => {
     setErrorMsg("");
 
@@ -46,7 +45,7 @@ export default function Step2({ increaseStep, reduceStep, email }) {
         return;
       }
 
-      increaseStep(); // success
+      increaseStep();
     } catch (err) {
       setErrorMsg("Server error. Try again.");
     }
@@ -125,9 +124,7 @@ export default function Step2({ increaseStep, reduceStep, email }) {
             </label>
           </div>
 
-          {errorMsg && (
-            <p className="text-red-500 text-sm mb-2">{errorMsg}</p>
-          )}
+          {errorMsg && <p className="text-red-500 text-sm mb-2">{errorMsg}</p>}
 
           <Button
             onClick={handleFinishSignUp}
@@ -146,13 +143,13 @@ export default function Step2({ increaseStep, reduceStep, email }) {
         </div>
       </div>
 
-         <div className="w-1/2 h-full p-3 ">
-  <img
-    src="/Delivery.svg"
-    alt="auth illustration"
-    className="w-[2440px] h-full object-cover rounded-lg"
-  />
-</div>
+      <div className="w-1/2 h-full p-3 ">
+        <img
+          src="/Delivery.svg"
+          alt="auth illustration"
+          className="w-[2440px] h-full object-cover rounded-lg"
+        />
+      </div>
     </div>
   );
 }

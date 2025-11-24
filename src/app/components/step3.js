@@ -5,9 +5,11 @@ import { Input } from "@/components/ui/input";
 import BackButton from "./BackButton";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { MailIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 
-export default function Step3({ increaseStep, reduceStep }) {
+export default function Step3({ reduceStep }) {
+  const router = useRouter(); // ✔ Router ашиглана
+
   const [show, setShow] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -16,57 +18,53 @@ export default function Step3({ increaseStep, reduceStep }) {
 
   const validEmail = /^\S+@\S+\.\S+$/.test(email);
 
- const handleNext = async () => {
-  setError("");
+  const handleNext = async () => {
+    setError("");
 
-  try {
-    const res = await fetch("http://localhost:999/api/auth/sign-in", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
+    try {
+      const res = await fetch("http://127.0.0.1:999/api/auth/sign-in", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-    const data = await res.json();
+      console.log("STATUS =", res.status);
 
-    if (!res.ok) {
-      setError(data.message || "Invalid email or password");
-      return;
+      const data = await res.json();
+      console.log("RESPONSE =", data);
+
+      if (!res.ok) {
+        setError(data.message || "Invalid email or password");
+        return;
+      }
+
+      router.push("/");
+    } catch (err) {
+      console.log("FETCH ERROR:", err);
+      setError("Server error. Try again.");
     }
-
-    // Амжилттай бол step нэмэгдэнэ
-    increaseStep();
-
-  } catch (err) {
-    setError("Server error. Try again.");
-  }
-};
-
+  };
 
   return (
     <div className="flex h-screen overflow-hidden">
-      {/* LEFT SIDE */}
       <div className="flex items-center justify-center w-1/2 bg-white">
         <div className="w-full max-w-[416px]">
-
-          {/* BACK BUTTON */}
           <div className="mb-6">
             <BackButton onClick={() => reduceStep(2)} />
           </div>
 
-          {/* TITLE */}
           <div className="mb-6">
             <h1 className="font-semibold text-2xl">Log in</h1>
             <p className="text-[#71717A]">
-              Finish your setup.
+              Log in to enjoy your favorite dishes.
             </p>
           </div>
 
-          {/* EMAIL INPUT */}
           <div className="relative mb-3">
-             <Input
+            <Input
               type="email"
               placeholder="Enter your email"
-              className={` w-[416px] ${
+              className={`w-[416px] ${
                 !validEmail && touched
                   ? "border-red-300 focus-visible:ring-red-300"
                   : ""
@@ -77,7 +75,6 @@ export default function Step3({ increaseStep, reduceStep }) {
             />
           </div>
 
-          {/* PASSWORD INPUT */}
           <div className="mb-1">
             <Input
               type={show ? "text" : "password"}
@@ -88,26 +85,25 @@ export default function Step3({ increaseStep, reduceStep }) {
             />
           </div>
 
-          {/* ERRORS */}
           <div className="h-2 mb-4">
             {error && <p className="text-red-500 text-sm">{error}</p>}
             {!validEmail && touched && (
-              <p className="text-red-300 text-sm">
-                Invalid email format.
-              </p>
+              <p className="text-red-300 text-sm">Invalid email format.</p>
             )}
           </div>
 
-          {/* SHOW PASSWORD */}
-          <div className="flex items-center gap-2 mb-6">
+          <div className="flex items-center gap-2 mb-4">
             <Checkbox id="show" checked={show} onCheckedChange={setShow} />
-            <label htmlFor="show" className="text-sm text-gray-600 cursor-pointer">
+            <label
+              htmlFor="show"
+              className="text-sm text-gray-600 cursor-pointer"
+            >
               Show password
             </label>
           </div>
 
-          {/* BUTTON */}
           <Button
+            type="button"
             onClick={handleNext}
             disabled={!validEmail || !password}
             className={`w-[416px] h-9 mb-6 cursor-pointer ${
@@ -121,12 +117,11 @@ export default function Step3({ increaseStep, reduceStep }) {
         </div>
       </div>
 
-      {/* RIGHT SIDE IMAGE */}
       <div className="w-1/2 h-full p-3">
         <img
           src="/Delivery.svg"
           alt="auth illustration"
-          className="w-full h-full object-cover rounded-lg"
+          className="w-[2440px] h-full object-cover rounded-lg"
         />
       </div>
     </div>

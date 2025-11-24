@@ -1,26 +1,27 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Step1 from "../components/step1";
 import Step2 from "../components/step2";
-import Step3 from "../components/step3";
+
 export default function Page() {
+  const router = useRouter();
   const [step, setStep] = useState(1);
 
   const [formData, setFormData] = useState({
     email: "",
-    firstName: "",
   });
 
   const increaseStep = (data) => {
     if (data) {
-      console.log("📥 INCREASE STEP DATA =", data);
+      setFormData((prev) => ({ ...prev, ...data }));
+    }
 
-      setFormData((prev) => {
-        const updated = { ...prev, ...data };
-        console.log("📦 UPDATED FORMDATA =", updated);
-        return updated;
-      });
+    if (step === 2) {
+      // Sign-up success → Login page руу явуулна
+      router.push("/login");
+      return;
     }
 
     setStep((prev) => prev + 1);
@@ -37,9 +38,7 @@ export default function Page() {
           reduceStep={reduceStep}
           email={formData.email}
         />
-         
       )}
-      {step === 3 && <Step3 reduceStep={reduceStep} />}
     </div>
   );
 }

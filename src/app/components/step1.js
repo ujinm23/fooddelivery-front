@@ -15,7 +15,7 @@ export default function Step1({ increaseStep }) {
 
   const handleNext = async () => {
     setError("");
-console.log("Step1 INCREASE email =", email);
+    console.log("Step1 INCREASE email =", email);
 
     try {
       const res = await fetch("http://localhost:999/api/auth/check-email", {
@@ -32,7 +32,6 @@ console.log("Step1 INCREASE email =", email);
       }
 
       increaseStep({ email });
-
     } catch (err) {
       setError("Server error. Try again.");
     }
@@ -86,7 +85,11 @@ console.log("Step1 INCREASE email =", email);
             onClick={handleNext}
             disabled={!validEmail}
             className={`w-[416px] h-9 mb-6 cursor-pointer
-              ${validEmail ? "bg-[#18181B] text-white" : "bg-gray-300 text-gray-500"}
+              ${
+                validEmail
+                  ? "bg-[#18181B] text-white"
+                  : "bg-gray-300 text-gray-500"
+              }
             `}
           >
             Let&apos;s Go
@@ -100,12 +103,12 @@ console.log("Step1 INCREASE email =", email);
       </div>
 
       <div className="w-1/2 h-full p-3 ">
-  <img
-    src="/Delivery.svg"
-    alt="auth illustration"
-    className="w-[2440px] h-full object-cover rounded-lg"
-  />
-</div>
+        <img
+          src="/Delivery.svg"
+          alt="auth illustration"
+          className="w-[2440px] h-full object-cover rounded-lg"
+        />
+      </div>
     </div>
   );
 }
