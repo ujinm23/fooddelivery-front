@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Step1 from "../components/step1";
-import Step2 from "../components/step2";
+import Step1 from "../_components/Steps/step1";
+import Step2 from "../_components/Steps/step2";
 
 export default function Page() {
   const router = useRouter();
@@ -19,7 +19,6 @@ export default function Page() {
     }
 
     if (step === 2) {
-      // Sign-up success → Login page руу явуулна
       router.push("/login");
       return;
     }
