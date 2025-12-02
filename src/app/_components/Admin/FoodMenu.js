@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Avatar from "@/app/_icons/Avatar";
 import CarBlack from "@/app/_icons/Car";
 import CompanyNew from "@/app/_icons/CompanyNew";
@@ -8,13 +8,11 @@ import HutIcon from "@/app/_icons/HutIcon";
 import Plus from "@/app/_icons/Plus";
 import Sqr from "@/app/_icons/squer";
 import DishModal from "../dishmodal/DishModal";
-
 import InfoIconPencil from "@/app/_icons/InfoIcon";
 import EditDishModal from "../dishmodal/EdithDishModel";
 import axios from "axios";
 
 export default function Order() {
-  const [categories, setCategories] = useState([]);
   const [showDishModal, setShowDishModal] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [newCategory, setNewCategory] = useState("");
@@ -23,58 +21,102 @@ export default function Order() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedDish, setSelectedDish] = useState(null);
 
+  const [newCategories, setNewCategories] = useState([]);
+
+  const getCategories = async () => {
+    try {
+      const res = await axios.get("http://localhost:999/api/categories");
+      setNewCategories(res.data);
+    } catch (err) {
+      console.log("Error loading categories:", err);
+    }
+  };
+
+  useEffect(() => {
+    getCategories();
+  }, []);
+
   const handleAddCategory = async () => {
     if (!newCategory.trim()) return;
-    await axios.post("http://localhost:999/api/categories", {
-      categoryName: newCategory,
+
+    const res = await axios.post("http://localhost:999/api/categories", {
+      categoryName: newCategory.trim(),
     });
 
-    setCategories([...categories, { name: newCategory.trim(), dishes: [] }]);
+    const createdCategory = res.data.data; // ← энд ID-тай зөв объект гарч ирнэ!
+
+    setNewCategories([...newCategories, createdCategory]);
     setNewCategory("");
     setShowCategoryModal(false);
   };
 
-  const handleDeleteCategory = (index) => {
-    const updated = categories.filter((_, i) => i !== index);
-    setCategories(updated);
+  const handleDeleteCategory = async (index) => {
+    const categoryId = newCategories[index]._id;
+    console.log("Deleting category:", categoryId);
 
-    if (activeCategoryIndex === index) setActiveCategoryIndex(null);
+    try {
+      const res = await axios.delete(
+        `http://localhost:999/api/categories/${categoryId}`
+      );
+      console.log("DELETE SUCCESS:", res.data);
+
+      const updated = newCategories.filter((_, i) => i !== index);
+      setNewCategories(updated);
+
+      if (activeCategoryIndex === index) setActiveCategoryIndex(null);
+    } catch (err) {
+      console.log("DELETE ERROR:", err.response?.data || err);
+    }
   };
 
-  const handleAddDish = (newDish) => {
+  const handleAddDish = async (newDish) => {
     if (activeCategoryIndex === null) return;
-    const updated = [...categories];
-    updated[activeCategoryIndex].dishes.push(newDish);
-    setCategories(updated);
-    setShowDishModal(false);
+
+    try {
+      const categoryId = newCategories[activeCategoryIndex]._id;
+
+      const dishRes = await axios.post("http://localhost:999/api/foods", {
+        foodName: newDish.name,
+        price: newDish.price,
+        ingredients: newDish.ingredients,
+        image: newDish.image,
+        category: categoryId,
+      });
+
+      const createdDish = dishRes.data.data;
+      const updated = [...newCategories];
+      updated[activeCategoryIndex].dishes = [
+        ...(updated[activeCategoryIndex].dishes || []),
+        createdDish,
+      ];
+
+      setNewCategories(updated);
+      setShowDishModal(false);
+    } catch (err) {
+      console.log("Dish add error:", err.response?.data || err);
+    }
   };
 
   return (
     <>
-      {showEditModal && (
+      {showEditModal && selectedDish && (
         <EditDishModal
           onClose={() => setShowEditModal(false)}
           dish={selectedDish}
-          categories={categories}
+          categories={newCategories}
           onSave={(updatedDish) => {
-            const updatedCats = [...categories];
-            const { catIndex, dishIndex } = updatedDish;
-            updatedCats[catIndex].dishes[dishIndex] = updatedDish;
-            setCategories(updatedCats);
+            const updated = [...newCategories];
+            updated[updatedDish.catIndex].dishes[updatedDish.dishIndex] =
+              updatedDish;
+            setNewCategories(updated);
             setShowEditModal(false);
           }}
         />
       )}
 
       {showCategoryModal && (
-        <div
-          className="fixed inset-0 bg-black/40 flex justify-center items-center z-50"
-          onClick={() => setShowCategoryModal(false)}
-        >
-          <div
-            className="bg-white p-6 rounded-xl w-[400px] relative"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-xl w-[400px] relative">
             <button
               onClick={() => setShowCategoryModal(false)}
               className="absolute top-3 right-4"
@@ -101,298 +143,161 @@ export default function Order() {
         </div>
       )}
 
-      {showDishModal && (
+      {showDishModal && activeCategoryIndex !== null && (
         <DishModal
           onClose={() => setShowDishModal(false)}
           onAddDish={handleAddDish}
-          categoryName={categories[activeCategoryIndex]?.name}
+          categoryName={
+            newCategories[activeCategoryIndex]?.categoryName || "Category"
+          }
         />
       )}
 
-      <div>
-        <div className="mx-auto w-full max-w-[1440px] px-4 md:px-8 flex gap-10 pr-10">
-          <div className="w-[205px] p-9">
-            <div className="flex items-center gap-2">
-              <HutIcon />
-              <div>
-                <CompanyNew />
-                <p className="text-xs text-gray-500">Swift delivery</p>
-              </div>
+      <div className="mx-auto w-full max-w-[1440px] px-4 md:px-8 flex gap-10 pr-10">
+        <div className="w-[205px] p-9">
+          <div className="flex items-center gap-2">
+            <HutIcon />
+            <div>
+              <CompanyNew />
+              <p className="text-xs text-gray-500">Swift delivery</p>
             </div>
-
-            <button className="w-full p-2 mt-10 bg-black text-white rounded-full flex gap-2 justify-center">
-              <Sqr /> Food Menu
-            </button>
-
-            <button className="w-full p-2 mt-4 rounded-full flex gap-2 justify-center">
-              <CarBlack /> Orders
-            </button>
           </div>
 
-          <div className="w-full mt-8">
-            <div className="flex justify-end mb-6">
-              <Avatar />
-            </div>
+          <button className="w-full p-2 mt-10 bg-black text-white rounded-full flex gap-2 justify-center">
+            <Sqr /> Food Menu
+          </button>
 
-            <div className="border rounded-xl p-6 mb-6">
-              <h1 className="text-xl font-semibold mb-4">Dishes category</h1>
+          <button className="w-full p-2 mt-4 rounded-full flex gap-2 justify-center">
+            <CarBlack /> Orders
+          </button>
+        </div>
 
-              <div className="flex gap-3 flex-wrap">
+        <div className="w-full mt-8">
+          <div className="flex justify-end mb-6">
+            <Avatar />
+          </div>
+
+          <div className="border rounded-xl p-6 mb-6">
+            <h1 className="text-xl font-semibold mb-4">Dishes category</h1>
+
+            <div className="flex gap-3 flex-wrap">
+              <div
+                onClick={() => {
+                  setShowAllDishes(true);
+                  setActiveCategoryIndex(null);
+                }}
+                className="px-4 py-2 rounded-full flex gap-2 cursor-pointer border"
+              >
+                All dishes
+                <span className="bg-black text-white rounded-full text-xs px-2 flex items-center">
+                  {newCategories.reduce(
+                    (t, c) => t + (c.dishes?.length || 0),
+                    0
+                  )}
+                </span>
+              </div>
+
+              {newCategories.map((category, index) => (
                 <div
+                  key={index}
                   onClick={() => {
-                    setShowAllDishes(true);
-                    setActiveCategoryIndex(null);
+                    setActiveCategoryIndex(index);
+                    setShowAllDishes(false);
                   }}
-                  className={`px-4 py-2 rounded-full flex gap-2 cursor-pointer border
-                  ${
-                    showAllDishes
-                      ? "#E4E4E7 text-black border-[#EF4444]"
-                      : "border-#E4E4E7 text-black hover:bg-gray-50"
-                  }
-                `}
+                  className={`relative px-4 py-2 rounded-full flex gap-2 cursor-pointer border ${
+                    activeCategoryIndex === index && !showAllDishes
+                      ? "border-[#EF4444]"
+                      : "hover:bg-gray-50"
+                  }`}
                 >
-                  All dishes
-                  <span className="bg-black flex items-center text-white rounded-full text-xs px-2">
-                    {categories.reduce((t, c) => t + c.dishes.length, 0)}
+                  {category.categoryName}
+                  <span className="bg-black text-white rounded-full text-xs px-2 flex items-center">
+                    {category.dishes?.length || 0}
                   </span>
-                </div>
 
-                {categories.map((cat, i) => (
-                  <div
-                    key={i}
-                    onClick={() => {
-                      setActiveCategoryIndex(i);
-                      setShowAllDishes(false);
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteCategory(index);
                     }}
-                    className={`relative px-4 py-2 rounded-full flex gap-2 cursor-pointer
-                    ${
-                      activeCategoryIndex === i && !showAllDishes
-                        ? "bg-#E4E4E7 text-black border border-[#EF4444]"
-                        : "border- text-black hover:bg-gray-50 border"
-                    }`}
+                    className="absolute -top-2 -right-2 bg-gray-200 text-black w-4 h-4 rounded-full text-[10px]"
                   >
-                    {cat.name}
-                    <span className="bg-black text-white rounded-full text-xs px-2 flex  items-center">
-                      {cat.dishes.length}
-                    </span>
+                    ✕
+                  </button>
+                </div>
+              ))}
 
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteCategory(i);
-                      }}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white w-4 h-4 rounded-full text-[10px]"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                ))}
-
-                <button
-                  onClick={() => setShowCategoryModal(true)}
-                  className="bg-red-500 w-9 h-9 rounded-full flex justify-center items-center text-white"
-                >
-                  <Plus />
-                </button>
-              </div>
+              <button
+                onClick={() => setShowCategoryModal(true)}
+                className="bg-red-500 w-9 h-9 rounded-full flex justify-center items-center text-white"
+              >
+                <Plus />
+              </button>
             </div>
+          </div>
 
-            {showAllDishes && (
-              <div className="flex flex-col gap-8">
-                {categories.map((cat, i) => (
-                  <div key={i} className="bg-white p-6 border rounded-xl">
-                    <h2 className="text-lg font-semibold mb-4">
-                      {cat.name} ({cat.dishes.length})
-                    </h2>
+          <div className="grid gap-8">
+            {(showAllDishes
+              ? newCategories
+              : [newCategories[activeCategoryIndex]]
+            )
+              .filter(Boolean)
+              .map((cat, i) => (
+                <div key={i} className="bg-white p-6 border rounded-xl">
+                  <h2 className="text-lg font-semibold mb-4">
+                    {cat.categoryName} ({cat.dishes?.length || 0})
+                  </h2>
 
-                    <div className="grid grid-cols-4 gap-5">
-                      <div
-                        onClick={() => {
-                          setActiveCategoryIndex(i);
-                          setShowDishModal(true);
-                        }}
-                        className="border-2 border-dashed border-red-500 rounded-xl w-[270px] h-[241px] flex justify-center items-center cursor-pointer hover:bg-red-50"
-                      >
-                        <div className="text-center">
-                          <button
-                            className="h-8 w-8 bg-red-500 text-white rounded-full mx-auto
-             flex items-center justify-center text-center
-             leading-none"
-                          >
-                            <Plus className="m-0 p-0" />
-                          </button>
-                          <p className="text-xs mt-2">
-                            Add new Dish to {cat.name}
-                          </p>
-                        </div>
-                      </div>
-
-                      {cat.dishes.map((dish, dIndex) => (
-                        <div
-                          key={dIndex}
-                          className="relative border rounded-xl p-3 w-[270px] h-[241px] shadow"
-                        >
-                          <button
-                            onClick={() => {
-                              const updated = [...categories];
-                              updated[i].dishes = updated[i].dishes.filter(
-                                (_, idx) => idx !== dIndex
-                              );
-                              setCategories(updated);
-                            }}
-                            className="absolute -top-2 -right-2 bg-red-500 text-white w-5 h-5 rounded-full text-[10px]"
-                          >
-                            ✕
-                          </button>
-
-                          <div className="relative h-[129px] w-full">
-                            <img
-                              src={dish.image}
-                              className="h-full w-full rounded-lg object-cover"
-                            />
-                            <button
-                              onClick={() => {
-                                const catIndex = categories.findIndex((c) =>
-                                  c.dishes.includes(dish)
-                                );
-                                const dishIndex =
-                                  categories[catIndex].dishes.indexOf(dish);
-
-                                setSelectedDish({
-                                  ...dish,
-                                  category: categories[catIndex].name,
-                                  catIndex: catIndex,
-                                  dishIndex: dishIndex,
-                                });
-
-                                setShowEditModal(true);
-                              }}
-                              className={`
-    absolute bottom-3 right-3
-    bg-white hover:bg-gray-200
-    rounded-full flex justify-center items-center
-    w-8 h-8
-    z-10
-  `}
-                            >
-                              <InfoIconPencil className="w-[18px] h-[18px] stroke-red-500" />
-                            </button>
-                          </div>
-
-                          <div className="flex justify-between mb-1">
-                            <p className="font-semibold text-red-500 line-clamp-2 w-[150px]">
-                              {dish.name}
-                            </p>
-                            <p className="font-bold text-sm">
-                              ${Number(dish.price).toFixed(2)}
-                            </p>
-                          </div>
-
-                          <p className="text-xs text-gray-500 line-clamp-3">
-                            {dish.ingredients}
-                          </p>
-                        </div>
-                      ))}
+                  <div className="grid grid-cols-4 gap-5">
+                    <div
+                      onClick={() => {
+                        setActiveCategoryIndex(i);
+                        setShowDishModal(true);
+                      }}
+                      className="border-2 border-dashed border-red-500 rounded-xl w-[270px] h-[241px] flex justify-center items-center hover:bg-red-50 z-20 cursor-pointer"
+                    >
+                      <Plus />
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
 
-            {!showAllDishes && activeCategoryIndex !== null && (
-              <div className="bg-white p-6 border rounded-xl mb-8">
-                <h2 className="text-lg font-semibold mb-4">
-                  {categories[activeCategoryIndex].name} (
-                  {categories[activeCategoryIndex].dishes.length})
-                </h2>
-
-                <div className="grid grid-cols-4 gap-5">
-                  <div
-                    onClick={() => setShowDishModal(true)}
-                    className="border-2 border-dashed border-red-500 rounded-xl w-[270px] h-[241px] flex justify-center items-center cursor-pointer hover:bg-red-50"
-                  >
-                    <div className="text-center ">
-                      <button className="h-8 w-8 bg-red-500 text-white rounded-full mx-auto flex items-center justify-center">
-                        <Plus />
-                      </button>
-
-                      <p className="text-xs mt-2">
-                        Add new Dish to {categories[activeCategoryIndex].name}
-                      </p>
-                    </div>
-                  </div>
-
-                  {categories[activeCategoryIndex].dishes.map(
-                    (dish, dIndex) => (
+                    {cat.dishes?.map((dish, dIndex) => (
                       <div
                         key={dIndex}
                         className="relative border rounded-xl p-3 w-[270px] h-[241px] shadow"
                       >
                         <button
                           onClick={() => {
-                            const updated = [...categories];
-                            updated[activeCategoryIndex].dishes = updated[
-                              activeCategoryIndex
-                            ].dishes.filter((_, idx) => idx !== dIndex);
-                            setCategories(updated);
+                            setSelectedDish({
+                              ...dish,
+                              catIndex: i,
+                              dishIndex: dIndex,
+                            });
+                            setShowEditModal(true);
                           }}
-                          className="absolute -top-2 -right-2 bg-red-500 text-white w-5 h-5 rounded-full text-[10px]"
+                          className="absolute top-2 right-2 bg-white rounded-full w-8 h-8 flex justify-center items-center"
                         >
-                          ✕
+                          <InfoIconPencil className="w-5 h-5 stroke-red-500" />
                         </button>
 
-                        <div className="relative h-[129px] w-full">
-                          <img
-                            src={dish.image}
-                            className="h-full w-full rounded-lg object-cover"
-                          />
-                          <button
-                            onClick={() => {
-                              const catIndex = categories.findIndex((c) =>
-                                c.dishes.includes(dish)
-                              );
-                              const dishIndex =
-                                categories[catIndex].dishes.indexOf(dish);
+                        <img
+                          src={dish.image}
+                          className="h-[129px] w-full rounded-lg object-cover"
+                        />
 
-                              setSelectedDish({
-                                ...dish,
-                                category: categories[catIndex].name,
-                                catIndex: catIndex,
-                                dishIndex: dishIndex,
-                              });
-
-                              setShowEditModal(true);
-                            }}
-                            className={`
-    absolute bottom-3 right-3
-    bg-white hover:bg-gray-200
-    rounded-full flex justify-center items-center
-    w-8 h-8
-    z-10
-  `}
-                          >
-                            <InfoIconPencil className="w-[18px] h-[18px] stroke-red-500" />
-                          </button>
-                        </div>
-
-                        <div className="flex justify-between mb-1">
-                          <p className="font-semibold text-red-500 line-clamp-2 w-[150px]">
+                        <div className="flex justify-between mt-2">
+                          <p className="text-red-500 font-semibold">
                             {dish.name}
                           </p>
-                          <p className="font-bold text-sm">
-                            ${Number(dish.price).toFixed(2)}
-                          </p>
+                          <p className="font-bold">${dish.price}</p>
                         </div>
 
                         <p className="text-xs text-gray-500 line-clamp-3">
                           {dish.ingredients}
                         </p>
                       </div>
-                    )
-                  )}
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              ))}
           </div>
         </div>
       </div>
