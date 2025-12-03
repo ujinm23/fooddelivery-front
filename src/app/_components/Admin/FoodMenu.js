@@ -43,7 +43,7 @@ export default function Order() {
       categoryName: newCategory.trim(),
     });
 
-    const createdCategory = res.data.data; // ← энд ID-тай зөв объект гарч ирнэ!
+    const createdCategory = res.data.data;
 
     setNewCategories([...newCategories, createdCategory]);
     setNewCategory("");
@@ -52,17 +52,9 @@ export default function Order() {
 
   const handleDeleteCategory = async (index) => {
     const categoryId = newCategories[index]._id;
-    console.log("Deleting category:", categoryId);
-
     try {
-      const res = await axios.delete(
-        `http://localhost:999/api/categories/${categoryId}`
-      );
-      console.log("DELETE SUCCESS:", res.data);
-
-      const updated = newCategories.filter((_, i) => i !== index);
-      setNewCategories(updated);
-
+      await axios.delete(`http://localhost:999/api/categories/${categoryId}`);
+      setNewCategories(newCategories.filter((_, i) => i !== index));
       if (activeCategoryIndex === index) setActiveCategoryIndex(null);
     } catch (err) {
       console.log("DELETE ERROR:", err.response?.data || err);
@@ -97,6 +89,23 @@ export default function Order() {
     }
   };
 
+  const handleDeleteDish = async (catIndex, dishIndex) => {
+    try {
+      const dishId = newCategories[catIndex].dishes[dishIndex]._id;
+
+      await axios.delete(`http://localhost:999/api/foods/${dishId}`);
+
+      const updated = [...newCategories];
+      updated[catIndex].dishes = updated[catIndex].dishes.filter(
+        (_, i) => i !== dishIndex
+      );
+
+      setNewCategories(updated);
+    } catch (err) {
+      console.log("DELETE dish ERROR:", err.response?.data || err);
+    }
+  };
+
   return (
     <>
       {showEditModal && selectedDish && (
@@ -111,6 +120,7 @@ export default function Order() {
             setNewCategories(updated);
             setShowEditModal(false);
           }}
+          onDeleteDish={handleDeleteDish}
         />
       )}
 
@@ -119,7 +129,7 @@ export default function Order() {
           <div className="bg-white p-6 rounded-xl w-[400px] relative">
             <button
               onClick={() => setShowCategoryModal(false)}
-              className="absolute top-3 right-4"
+              className="absolute top-3 right-4 cursor-pointer"
             >
               ✕
             </button>
@@ -181,12 +191,14 @@ export default function Order() {
             <h1 className="text-xl font-semibold mb-4">Dishes category</h1>
 
             <div className="flex gap-3 flex-wrap">
-              <div
+              <button
                 onClick={() => {
                   setShowAllDishes(true);
                   setActiveCategoryIndex(null);
                 }}
-                className="px-4 py-2 rounded-full flex gap-2 cursor-pointer border"
+                className={`px-4 py-2 rounded-full flex gap-2 cursor-pointer border
+    ${showAllDishes ? "border-[#EF4444] " : "border-gray-300 hover:bg-gray-100"}
+  `}
               >
                 All dishes
                 <span className="bg-black text-white rounded-full text-xs px-2 flex items-center">
@@ -195,7 +207,7 @@ export default function Order() {
                     0
                   )}
                 </span>
-              </div>
+              </button>
 
               {newCategories.map((category, index) => (
                 <div
@@ -254,9 +266,11 @@ export default function Order() {
                         setActiveCategoryIndex(i);
                         setShowDishModal(true);
                       }}
-                      className="border-2 border-dashed border-red-500 rounded-xl w-[270px] h-[241px] flex justify-center items-center hover:bg-red-50 z-20 cursor-pointer"
+                      className="border-2 border-dashed border-red-500 rounded-xl w-[270px] h-[241px] flex justify-center items-center hover:bg-red-50 cursor-pointer"
                     >
-                      <Plus />
+                      <button className="bg-red-500 w-9 cursor-pointer h-9 rounded-full flex justify-center items-center text-white">
+                        <Plus />
+                      </button>
                     </div>
 
                     {cat.dishes?.map((dish, dIndex) => (
@@ -273,7 +287,7 @@ export default function Order() {
                             });
                             setShowEditModal(true);
                           }}
-                          className="absolute top-2 right-2 bg-white rounded-full w-8 h-8 flex justify-center items-center"
+                          className="absolute top-25 right-6 bg-white  cursor-pointer rounded-full w-9 h-9 flex justify-center items-center"
                         >
                           <InfoIconPencil className="w-5 h-5 stroke-red-500" />
                         </button>
@@ -285,7 +299,7 @@ export default function Order() {
 
                         <div className="flex justify-between mt-2">
                           <p className="text-red-500 font-semibold">
-                            {dish.name}
+                            {dish.foodName}
                           </p>
                           <p className="font-bold">${dish.price}</p>
                         </div>
