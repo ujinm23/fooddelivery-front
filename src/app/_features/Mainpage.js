@@ -3,10 +3,15 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import FoodDetailModal from "../_components/dishmodal/FoodDetailModal";
+import Toast from "../_components/Toast/Toast";
+import CartDrawer from "../_components/CardDrawer/CartDrawer";
 
 export default function MainPage() {
   const [categories, setCategories] = useState([]);
   const [selectedDish, setSelectedDish] = useState(null);
+  const [showToast, setShowToast] = useState(false);
+  const [cart, setCart] = useState([]);
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
   const getCategories = async () => {
     try {
@@ -21,10 +26,45 @@ export default function MainPage() {
     getCategories();
   }, []);
 
-  const handleAddToCart = (dish, qty) => {
-    console.log("Cart ➕", dish.foodName, "qty:", qty);
-    setSelectedDish(null);
+  const handleAddToCart = (dish, count) => {
+  console.log("Cart ➕", dish.name, "qty:", count);
+
+  setSelectedDish(null);
+
+  
+  setShowToast(true);
+  setTimeout(() => {
+    setShowToast(false);
+  }, 2000);
+
+
+  const newItem = {
+    id: dish.id,
+    name: dish.name,
+    price: dish.price,
+    image: dish.image,
+    quantity: count,
   };
+
+  setCart((prev) => [...prev, newItem]);
+
+ 
+  setIsCartOpen(true);
+};
+
+const handleUpdateQty = (id, newQty) => {
+  if (newQty < 1) return;
+  setCart(prev =>
+    prev.map(item =>
+      item.id === id ? { ...item, quantity: newQty } : item
+    )
+  );
+};
+
+const handleRemoveItem = (id) => {
+  setCart(prev => prev.filter(item => item.id !== id));
+};
+
 
   return (
     <div>
@@ -93,6 +133,23 @@ export default function MainPage() {
           ))}
         </div>
       </div>
+       <div>
+      <button
+        onClick={handleAddToCart}
+        className="bg-purple-600 text-white px-4 py-2 rounded-md"
+      >
+        Add to Cart
+      </button>
+
+      {showToast && <Toast message="Food is being added to the cart!" />}
+    </div>
+      <CartDrawer 
+         isOpen={isCartOpen}
+  cartItems={cart}
+  onClose={() => setIsCartOpen(false)}
+  onUpdateQty={handleUpdateQty}
+  onRemoveItem={handleRemoveItem}
+      />
     </div>
   );
 }
