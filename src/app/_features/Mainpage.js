@@ -27,44 +27,40 @@ export default function MainPage() {
   }, []);
 
   const handleAddToCart = (dish, count) => {
-  console.log("Cart ➕", dish.name, "qty:", count);
+    console.log("Cart ➕", dish.name, "qty:", count);
 
-  setSelectedDish(null);
+    setSelectedDish(null);
 
-  
-  setShowToast(true);
-  setTimeout(() => {
-    setShowToast(false);
-  }, 2000);
+    setShowToast(true);
+    setTimeout(() => {
+      setShowToast(false);
+    }, 2000);
 
+    const newItem = {
+      id: dish.id,
+      name: dish.name,
+      price: dish.price,
+      image: dish.image,
+      quantity: count,
+    };
 
-  const newItem = {
-    id: dish.id,
-    name: dish.name,
-    price: dish.price,
-    image: dish.image,
-    quantity: count,
+    setCart((prev) => [...prev, newItem]);
+
+    setIsCartOpen(true);
   };
 
-  setCart((prev) => [...prev, newItem]);
+  const handleUpdateQty = (id, newQty) => {
+    if (newQty < 1) return;
+    setCart((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, quantity: newQty } : item
+      )
+    );
+  };
 
- 
-  setIsCartOpen(true);
-};
-
-const handleUpdateQty = (id, newQty) => {
-  if (newQty < 1) return;
-  setCart(prev =>
-    prev.map(item =>
-      item.id === id ? { ...item, quantity: newQty } : item
-    )
-  );
-};
-
-const handleRemoveItem = (id) => {
-  setCart(prev => prev.filter(item => item.id !== id));
-};
-
+  const handleRemoveItem = (id) => {
+    setCart((prev) => prev.filter((item) => item.id !== id));
+  };
 
   return (
     <div>
@@ -109,7 +105,7 @@ const handleRemoveItem = (id) => {
                     <button
                       onClick={() => setSelectedDish(dish)}
                       className="absolute top-44 right-6 bg-white text-red-500 
-                                 border border-red-500 w-8 h-8 rounded-full 
+                                 border cursor-pointer w-8 h-8 rounded-full 
                                  flex items-center justify-center 
                                  hover:bg-red-500 hover:text-white transition"
                     >
@@ -133,22 +129,15 @@ const handleRemoveItem = (id) => {
           ))}
         </div>
       </div>
-       <div>
-      <button
-        onClick={handleAddToCart}
-        className="bg-purple-600 text-white px-4 py-2 rounded-md"
-      >
-        Add to Cart
-      </button>
-
-      {showToast && <Toast message="Food is being added to the cart!" />}
-    </div>
-      <CartDrawer 
-         isOpen={isCartOpen}
-  cartItems={cart}
-  onClose={() => setIsCartOpen(false)}
-  onUpdateQty={handleUpdateQty}
-  onRemoveItem={handleRemoveItem}
+      <div>
+        {showToast && <Toast message="Food is being added to the cart!" />}
+      </div>
+      <CartDrawer
+        isOpen={isCartOpen}
+        cartItems={cart}
+        onClose={() => setIsCartOpen(false)}
+        onUpdateQty={handleUpdateQty}
+        onRemoveItem={handleRemoveItem}
       />
     </div>
   );
