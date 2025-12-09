@@ -5,6 +5,8 @@ import axios from "axios";
 import FoodDetailModal from "../_components/dishmodal/FoodDetailModal";
 import Toast from "../_components/Toast/Toast";
 import CartDrawer from "../_components/CardDrawer/CartDrawer";
+import SuccessOrderModal from "../_components/SuccessOrderModal/SuccessOrderModal";
+import LoginModal from "../_components/LoginModal/LoginModal";
 
 export default function MainPage() {
   const [categories, setCategories] = useState([]);
@@ -12,6 +14,19 @@ export default function MainPage() {
   const [showToast, setShowToast] = useState(false);
   const [cart, setCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [user, setUser] = useState(null);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  const handleCheckout = () => {
+    if (!user) {
+      setShowLoginModal(true);
+      return;
+    }
+
+    setCart([]);
+    setShowSuccess(true);
+  };
 
   const getCategories = async () => {
     try {
@@ -24,10 +39,16 @@ export default function MainPage() {
 
   useEffect(() => {
     getCategories();
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
   }, []);
 
   const handleAddToCart = (dish, count) => {
-    console.log("Cart ➕", dish.name, "qty:", count);
+    console.log("Cart ➕", dish.foodName || dish.name, "qty:", count);
+
+    const dishId = dish.id || dish._id || dish.foodId || Date.now();
 
     setSelectedDish(null);
 
@@ -36,15 +57,29 @@ export default function MainPage() {
       setShowToast(false);
     }, 2000);
 
-    const newItem = {
-      id: dish.id,
-      name: dish.name,
-      price: dish.price,
-      image: dish.image,
-      quantity: count,
-    };
+    setCart((prev) => {
+      const existingItem = prev.find((item) => item.id === dishId);
 
-    setCart((prev) => [...prev, newItem]);
+      if (existingItem) {
+        return prev.map((item) =>
+          item.id === dishId
+            ? { ...item, quantity: item.quantity + count }
+            : item
+        );
+      }
+
+      return [
+        ...prev,
+        {
+          id: dishId,
+          name: dish.foodName || dish.name,
+          price: dish.price,
+          image: dish.image,
+          description: dish.ingredients || dish.description || "",
+          quantity: count,
+        },
+      ];
+    });
 
     setIsCartOpen(true);
   };
@@ -61,6 +96,8 @@ export default function MainPage() {
   const handleRemoveItem = (id) => {
     setCart((prev) => prev.filter((item) => item.id !== id));
   };
+
+  console.log("CART FROM MAINPAGE", cart);
 
   return (
     <div>
@@ -138,7 +175,16 @@ export default function MainPage() {
         onClose={() => setIsCartOpen(false)}
         onUpdateQty={handleUpdateQty}
         onRemoveItem={handleRemoveItem}
+        onCheckout={handleCheckout}
       />
+
+      {showLoginModal && (
+        <LoginModal onClose={() => setShowLoginModal(false)} />
+      )}
+
+      {showSuccess && (
+        <SuccessOrderModal onClose={() => setShowSuccess(false)} />
+      )}
     </div>
   );
 }

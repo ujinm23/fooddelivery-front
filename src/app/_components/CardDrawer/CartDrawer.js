@@ -8,6 +8,7 @@ export default function CartDrawer({
   onClose,
   onUpdateQty,
   onRemoveItem,
+  onCheckout,
 }) {
   const shippingFee = 0.99;
   const itemsTotal = cartItems.reduce(
@@ -49,7 +50,7 @@ export default function CartDrawer({
         </div>
 
         {/* My Cart heseg  */}
-        <div className="bg-white flex-1 p-5 rounded-2xl flex flex-col mb-2">
+        <div className="bg-white flex-1 p-5 rounded-2xl flex flex-col mb-2 overflow-hidden">
           <h3 className="font-semibold text-[#18181B] mb-4">My cart</h3>
 
           <div className="flex-1 overflow-y-auto h-[532px] pr-1">
@@ -58,6 +59,7 @@ export default function CartDrawer({
                 key={index}
                 className="flex justify-between items-start mb-4"
               >
+                {console.log("CART ITEM ===>")}
                 <div className="flex gap-3">
                   <img
                     src={item.image}
@@ -66,39 +68,46 @@ export default function CartDrawer({
                   />
                   <div className="flex flex-col justify-between">
                     <p className="text-[#EF4444] font-medium">
-                      {item.foodName}
+                      {item.foodName || item.name || "No name"}
                     </p>
                     <p className="text-xs text-gray-500 w-[150px] line-clamp-2">
-                      {item.ingredients}
+                      {item.ingredients || item.description || "No description"}
                     </p>
-                    <div className="flex items-center gap-3 mt-1">
-                      <button
-                        onClick={() => onUpdateQty(item.id, item.quantity - 1)}
-                        className="border w-6 h-6 rounded-full flex justify-center items-center"
-                      >
-                        −
-                      </button>
-                      <span className="text-sm w-5 text-center">
-                        {item.quantity}
-                      </span>
-                      <button
-                        onClick={() => onUpdateQty(item.id, item.quantity + 1)}
-                        className="border w-6 h-6 rounded-full flex justify-center items-center"
-                      >
-                        +
-                      </button>
+                    <div className="flex items-center gap-3 mt-1 justify-between">
+                      <div className="flex mb-2">
+                        <button
+                          onClick={() =>
+                            onUpdateQty(item.id, item.quantity - 1)
+                          }
+                          className="border w-6 h-6 rounded-full flex justify-center items-center"
+                        >
+                          −
+                        </button>
+                        <span className="text-sm w-5 text-center">
+                          {item.quantity}
+                        </span>
+                        <button
+                          onClick={() =>
+                            onUpdateQty(item.id, item.quantity + 1)
+                          }
+                          className="border w-6 h-6 rounded-full flex justify-center items-center"
+                        >
+                          +
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex flex-col items-end gap-2">
+                <div className="flex flex-col items-end  gap-2">
                   <button
                     onClick={() => onRemoveItem(item.id)}
                     className="text-red-500 border border-red-400 rounded-full w-6 h-6 flex justify-center items-center"
                   >
                     ✕
                   </button>
-                  <span className="font-semibold text-sm">
+
+                  <span className="font-semibold text-sm mt-14">
                     ${(item.price * item.quantity).toFixed(2)}
                   </span>
                 </div>
@@ -118,25 +127,24 @@ export default function CartDrawer({
 
         <div className="bg-white rounded-2xl p-5">
           <p className="font-medium text-[#18181B] mb-3">Payment info</p>
-
           <div className="flex justify-between text-sm mb-2">
             <span>Items</span>
             <span>${itemsTotal.toFixed(2)}</span>
           </div>
-
           <div className="flex justify-between text-sm mb-2">
             <span>Shipping</span>
             <span>{shippingFee}$</span>
           </div>
-
           <hr className="my-4 border-dashed" />
-
           <div className="flex justify-between font-semibold text-lg mb-4">
             <span>Total</span>
             <span>${totalPrice}</span>
           </div>
 
-          <button className="w-full py-3 bg-[#EF4444] text-white rounded-full text-lg">
+          <button
+            onClick={onCheckout}
+            className="w-full py-3 bg-[#EF4444] text-white rounded-full text-lg"
+          >
             Checkout
           </button>
         </div>

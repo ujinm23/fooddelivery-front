@@ -37,7 +37,6 @@ export default function FoodDetailModal({ dish, onClose, onAddToCart }) {
             {dish.ingredients}
           </p>
 
-         
           <div className="flex justify-between items-center mt-30">
             <div>
               <p className="text-base">Total price</p>
@@ -46,8 +45,8 @@ export default function FoodDetailModal({ dish, onClose, onAddToCart }) {
 
             <div className="flex items-center gap-4">
               <button
-                onClick={() => setCount(prev => Math.max(prev - 1, 1))}
-                className="w-[44px] h-[44px] rounded-full bg-white border border-[#E4E4E7]"
+                onClick={() => setCount((prev) => Math.max(prev - 1, 1))}
+                className="w-11 h-11 rounded-full bg-white border border-[#E4E4E7]"
               >
                 -
               </button>
@@ -55,15 +54,14 @@ export default function FoodDetailModal({ dish, onClose, onAddToCart }) {
               <span className="font-semibold">{count}</span>
 
               <button
-                onClick={() => setCount(prev => prev + 1)}
-                className="w-[44px] h-[44px] rounded-full bg-white border border-[#09090B]"
+                onClick={() => setCount((prev) => prev + 1)}
+                className="w-11 h-11 rounded-full bg-white border border-[#09090B]"
               >
                 +
               </button>
             </div>
           </div>
 
-        
           <button
             onClick={() => {
               onAddToCart(dish, count);
@@ -73,11 +71,8 @@ export default function FoodDetailModal({ dish, onClose, onAddToCart }) {
           >
             Add to cart
           </button>
-
         </div>
       </div>
     </div>
   );
 }
-
-

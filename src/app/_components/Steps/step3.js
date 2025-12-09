@@ -38,6 +38,8 @@ export default function Step3({ reduceStep }) {
         return;
       }
 
+      localStorage.setItem("user", JSON.stringify(data.user));
+
       router.push("/");
     } catch (err) {
       console.log("FETCH ERROR:", err);
