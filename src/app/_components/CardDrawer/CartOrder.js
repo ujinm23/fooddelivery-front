@@ -1,43 +1,63 @@
-export default function CartOrder({ orders = [] }) {
-  console.log("ORDERS PROP ===>", orders);
+"use client";
 
+export default function CartOrder({ orders }) {
   return (
-    <div className="bg-white flex-1 p-5 rounded-2xl overflow-y-auto">
-      <h3 className="font-semibold text-[#18181B] mb-4">Order history</h3>
+    <div className="bg-white flex-1 p-6 rounded-2xl overflow-y-auto">
+      <h3 className="text-2xl font-semibold mb-6">Order history</h3>
 
-      {!orders || orders.length === 0 ? (
+      {(!orders || orders.length === 0) && (
         <p className="text-gray-500 text-sm text-center">
           You have no previous orders.
         </p>
-      ) : (
-        orders.map((order, index) => (
-          <div key={index} className="border-b border-dashed pb-4 mb-4">
-            <p className="font-bold">
-              ${order.totalPrice} <span className="text-xs">#{order._id}</span>
+      )}
+
+      {orders?.map((order, index) => (
+        <div key={order._id}>
+          {/* Header */}
+          <div className="flex justify-between items-center mb-3">
+            <p className="text-xl font-bold">
+              ${order.totalPrice}
+              <span className="text-sm font-normal text-gray-500 ml-2">
+                #{order._id.slice(-5)}
+              </span>
             </p>
 
-            <div
-              className={`text-xs px-3 py-1 rounded-full inline-block mt-2 ${
-                order.status === "Pending"
-                  ? "text-red-500 border border-red-500"
-                  : "text-green-600 bg-gray-100"
-              }`}
+            <span
+              className={`px-4 py-1 text-sm rounded-full border
+                ${
+                  order.status === "pending"
+                    ? "border-red-400 text-red-500"
+                    : order.status === "delivered"
+                    ? "bg-gray-100 text-gray-700"
+                    : "border-gray-300 text-gray-600"
+                }`}
             >
-              {order.status}
-            </div>
+              {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+            </span>
+          </div>
 
-            {order.items?.map((item, i) => (
-              <div key={i} className="text-sm text-gray-600 mt-2">
-                {item.name} x {item.quantity}
+          {/* Foods */}
+          <div className="space-y-2 mb-3">
+            {order.foodOrderItems?.map((item, i) => (
+              <div key={i} className="flex justify-between text-gray-700">
+                <div className="flex items-center gap-2">
+                  <span>🍲</span>
+                  <span>{item.food?.name}</span>
+                </div>
+                <span>x {item.quantity}</span>
               </div>
             ))}
-
-            <p className="text-xs text-gray-400 mt-3">
-              {new Date(order.createdAt).toLocaleDateString()}
-            </p>
           </div>
-        ))
-      )}
+
+          {/* Date */}
+          <div className="flex items-center gap-2 text-gray-500 text-sm mb-2">
+            <span>⏱</span>
+            {new Date(order.createdAt).toLocaleDateString()}
+          </div>
+
+          {index !== orders.length - 1 && <hr className="my-6 border-dashed" />}
+        </div>
+      ))}
     </div>
   );
 }

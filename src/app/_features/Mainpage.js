@@ -1,50 +1,54 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import axios from "axios";
+import axios from "@/lib/axios";
 import FoodDetailModal from "../_components/dishmodal/FoodDetailModal";
 import Toast from "../_components/Toast/Toast";
 import CartDrawer from "../_components/CardDrawer/CartDrawer";
 import SuccessOrderModal from "../_components/SuccessOrderModal/SuccessOrderModal";
-
 import { useRouter } from "next/navigation";
 
 export default function MainPage({ isCartOpen, openCart, closeCart }) {
   const router = useRouter();
+
   const [categories, setCategories] = useState([]);
   const [selectedDish, setSelectedDish] = useState(null);
   const [showToast, setShowToast] = useState(false);
+
   const [cart, setCart] = useState([]);
+
   const [user, setUser] = useState(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [orders, setOrders] = useState([]);
 
-  const handleCheckout = async () => {
-    if (!user) {
-      localStorage.setItem("isCartOpen", "true");
-      setShowLoginModal(true);
-      return;
+  const shippingFee = 0.99;
+  const itemsTotal = cart.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
+
+  useEffect(() => {
+    const savedCart = localStorage.getItem("cart");
+    if (savedCart) {
+      setCart(JSON.parse(savedCart));
     }
+  }, []);
 
-    try {
-      await axios.post("https://foodapp-back-k58d.onrender.com/api/orders", {
-        userId: user.id,
-        items: cart,
-        totalPrice: itemsTotal + shippingFee,
-        status: "Pending",
-      });
-
-      setCart([]);
-      localStorage.setItem("cart", "[]");
-
-      fetchOrders();
-
-      setShowSuccess(true);
-    } catch (error) {
-      console.log("Order save error:", error);
+  useEffect(() => {
+    if (cart.length === 0) {
+      localStorage.removeItem("cart");
+    } else {
+      localStorage.setItem("cart", JSON.stringify(cart));
     }
-  };
+  }, [cart]);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
 
   const getCategories = async () => {
     try {
@@ -53,60 +57,33 @@ export default function MainPage({ isCartOpen, openCart, closeCart }) {
       );
       setCategories(res.data);
     } catch (err) {
-      console.log("Error loading categories:", err);
-    }
-  };
-
-  const fetchOrders = async () => {
-    try {
-      const res = await axios.get(
-        "https://foodapp-back-k58d.onrender.com/api/orders"
-      );
-      console.log("ORDERS API RESPONSE ===>", res.data);
-      setOrders(res.data.data);
-    } catch (err) {
-      console.log("Order fetch error:", err);
+      console.log("Category load error:", err);
     }
   };
 
   useEffect(() => {
     getCategories();
-
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-
-    const savedCart = localStorage.getItem("cart");
-    if (savedCart) {
-      setCart(JSON.parse(savedCart));
-    }
+    fetchOrders();
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem("cart", JSON.stringify(cart));
-  }, [cart]);
-
-  useEffect(() => {
-    localStorage.setItem("isCartOpen", isCartOpen ? "true" : "false");
-  }, [isCartOpen]);
+  const clearCart = () => {
+    console.log("CLEAR CART CALLED");
+    setCart([]);
+    localStorage.removeItem("cart");
+  };
 
   const handleAddToCart = (dish, count) => {
-    console.log("Cart ➕", dish.foodName || dish.name, "qty:", count);
-
-    const dishId = dish.id || dish._id || dish.foodId || Date.now();
+    const dishId = dish._id;
 
     setSelectedDish(null);
 
     setShowToast(true);
-    setTimeout(() => {
-      setShowToast(false);
-    }, 2000);
+    setTimeout(() => setShowToast(false), 2000);
 
     setCart((prev) => {
-      const existingItem = prev.find((item) => item.id === dishId);
+      const existing = prev.find((item) => item.id === dishId);
 
-      if (existingItem) {
+      if (existing) {
         return prev.map((item) =>
           item.id === dishId
             ? { ...item, quantity: item.quantity + count }
@@ -121,7 +98,7 @@ export default function MainPage({ isCartOpen, openCart, closeCart }) {
           name: dish.foodName || dish.name,
           price: dish.price,
           image: dish.image,
-          description: dish.ingredients || dish.description || "",
+          description: dish.ingredients || "",
           quantity: count,
         },
       ];
@@ -130,12 +107,10 @@ export default function MainPage({ isCartOpen, openCart, closeCart }) {
     openCart();
   };
 
-  const handleUpdateQty = (id, newQty) => {
-    if (newQty < 1) return;
+  const handleUpdateQty = (id, qty) => {
+    if (qty < 1) return;
     setCart((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, quantity: newQty } : item
-      )
+      prev.map((item) => (item.id === id ? { ...item, quantity: qty } : item))
     );
   };
 
@@ -143,38 +118,41 @@ export default function MainPage({ isCartOpen, openCart, closeCart }) {
     setCart((prev) => prev.filter((item) => item.id !== id));
   };
 
-  useEffect(() => {
-    setOrders([
-      {
-        _id: "20156",
-        totalPrice: 26.97,
+  const handleCheckout = async () => {
+    if (!user) return;
+    if (cart.length === 0) return;
+
+    try {
+      await axios.post("https://foodapp-back-k58d.onrender.com/api/orders", {
+        items: cart,
+        totalPrice: itemsTotal + shippingFee,
         status: "pending",
-        createdAt: "2024-12-20T10:00:00Z",
-        foodOrderItems: [
-          {
-            food: { name: "Sunshine Stackers" },
-            quantity: 1,
-          },
-          {
-            food: { name: "Sunshine Stackers" },
-            quantity: 1,
-          },
-        ],
-      },
-      {
-        _id: "20157",
-        totalPrice: 12.99,
-        status: "delivered",
-        createdAt: "2024-12-20T10:00:00Z",
-        foodOrderItems: [
-          {
-            food: { name: "Sunshine Stackers" },
-            quantity: 1,
-          },
-        ],
-      },
-    ]);
-  }, []);
+      });
+
+      setCart([]);
+
+      await fetchOrders();
+
+      setShowSuccess(true);
+    } catch (err) {
+      console.log("Checkout error:", err);
+    }
+  };
+
+  const fetchOrders = async () => {
+    try {
+      const res = await axios.get("/api/orders");
+      setOrders(res.data.data);
+    } catch (err) {
+      console.log("Order fetch error:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchOrders();
+    }
+  }, [user]);
 
   return (
     <div>
@@ -254,6 +232,7 @@ export default function MainPage({ isCartOpen, openCart, closeCart }) {
         onRemoveItem={handleRemoveItem}
         onCheckout={handleCheckout}
         orders={orders}
+        onClearCart={clearCart}
       />
 
       {showSuccess && (

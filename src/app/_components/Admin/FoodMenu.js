@@ -214,7 +214,7 @@ export default function Order() {
                 className={`w-full p-2 mt-4 cursor-pointer rounded-full flex gap-2 justify-center items-center ${
                   activeTab === "OrderMenu"
                     ? "bg-black text-white"
-                    : "bg-gray-200 text-black"
+                    : " text-black"
                 }`}
               >
                 {activeTab === "OrderMenu" ? <CarWhiteIcon /> : <CarBlack />}
