@@ -73,7 +73,7 @@ export default function Step2({ increaseStep, reduceStep, email }) {
       if (err instanceof SyntaxError) {
         setErrorMsg("Server-ийн хариу буруу байна. Дахин оролдоно уу.");
       } else {
-        setErrorMsg("Server error. Try again.");
+      setErrorMsg("Server error. Try again.");
       }
     }
   };
