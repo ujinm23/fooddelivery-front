@@ -4,34 +4,31 @@ import OrderDetail from "@/app/_icons/Orderdetail";
 import CartOrder from "./CartOrder";
 import toast from "react-hot-toast";
 import { orderApi } from "@/lib/api";
+import { useCart } from "@/contexts/CartContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function CartDrawer({
   isOpen,
-  cartItems,
   onClose,
-  onUpdateQty,
-  onRemoveItem,
-  onClearCart,
+  orders: externalOrders,
 }) {
+  const { cartItems, updateQuantity, removeFromCart, clearCart, getTotalPrice } = useCart();
+  const { user, getUserId, isAuthenticated } = useAuth();
+  
   const [activeTab, setActiveTab] = useState("cart");
-  const [orders, setOrders] = useState([]);
-  const [user, setUser] = useState(null);
+  const [orders, setOrders] = useState(externalOrders || []);
   const [deliveryAddress, setDeliveryAddress] = useState("");
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (err) {
-        console.error("Failed to parse user from localStorage:", err);
-      }
+    if (externalOrders) {
+      setOrders(externalOrders);
     }
-  }, []);
+  }, [externalOrders]);
 
   const fetchOrders = async () => {
     try {
-      const userId = user?._id || user?.id;
+      const userId = getUserId();
+      if (!userId) return;
       const ordersData = await orderApi.getOrders(userId);
       setOrders(ordersData);
     } catch (err) {
@@ -41,16 +38,13 @@ export default function CartDrawer({
   };
 
   useEffect(() => {
-    if (user && activeTab === "orders") {
+    if (isAuthenticated() && activeTab === "orders") {
       fetchOrders();
     }
   }, [user, activeTab]);
 
   const shippingFee = 0.99;
-  const itemsTotal = cartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
+  const itemsTotal = getTotalPrice();
   const totalPrice = (itemsTotal + shippingFee).toFixed(2);
 
   const handleCheckout = async () => {
@@ -59,12 +53,12 @@ export default function CartDrawer({
       return;
     }
 
-    if (!user) {
+    if (!isAuthenticated()) {
       toast.error("Захиалга хийхийн тулд нэвтэрнэ үү");
       return;
     }
 
-    const userId = user._id || user.id;
+    const userId = getUserId();
     if (!userId) {
       toast.error("Хэрэглэгчийн мэдээлэл олдсонгүй");
       return;
@@ -89,7 +83,7 @@ export default function CartDrawer({
       const result = await orderApi.createOrder(orderData);
 
       await fetchOrders();
-      onClearCart();
+      clearCart();
       setDeliveryAddress(""); // Address цэвэрлэх
       setActiveTab("orders");
 
@@ -166,7 +160,7 @@ export default function CartDrawer({
                       />
                       <div className="flex flex-col justify-between">
                         <p className="text-[#EF4444] font-medium">
-                          {item.foodName || item.name || "No name"}
+                          {item.name || item.foodName || "No name"}
                         </p>
                         <p className="text-xs text-gray-500 w-[150px] line-clamp-2">
                           {item.ingredients ||
@@ -177,7 +171,7 @@ export default function CartDrawer({
                           <div className="flex mb-2">
                             <button
                               onClick={() =>
-                                onUpdateQty(item.id, item.quantity - 1)
+                                updateQuantity(item.id, item.quantity - 1)
                               }
                               className="border w-6 h-6 rounded-full flex justify-center items-center"
                             >
@@ -188,7 +182,7 @@ export default function CartDrawer({
                             </span>
                             <button
                               onClick={() =>
-                                onUpdateQty(item.id, item.quantity + 1)
+                                updateQuantity(item.id, item.quantity + 1)
                               }
                               className="border w-6 h-6 rounded-full flex justify-center items-center"
                             >
@@ -201,7 +195,7 @@ export default function CartDrawer({
 
                     <div className="flex flex-col items-end gap-2">
                       <button
-                        onClick={() => onRemoveItem(item.id)}
+                        onClick={() => removeFromCart(item.id)}
                         className="text-red-500 border border-red-400 rounded-full w-6 h-6 flex justify-center items-center"
                       >
                         ✕
@@ -256,7 +250,7 @@ export default function CartDrawer({
 
         {activeTab === "orders" && (
           <>
-            {!user ? (
+            {!isAuthenticated() ? (
               <div className="bg-white flex-1 p-6 rounded-2xl flex flex-col items-center justify-center">
                 <p className="text-gray-500 text-center mb-4">
                   Захиалгын түүх харахын тулд нэвтэрнэ үү

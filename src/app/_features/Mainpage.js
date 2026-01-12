@@ -7,48 +7,23 @@ import Toast from "../_components/Toast/Toast";
 import CartDrawer from "../_components/CardDrawer/CartDrawer";
 import SuccessOrderModal from "../_components/SuccessOrderModal/SuccessOrderModal";
 import { useRouter } from "next/navigation";
+import { useCart } from "@/contexts/CartContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function MainPage({ isCartOpen, openCart, closeCart }) {
   const router = useRouter();
+  const { cartItems, addToCart, updateQuantity, removeFromCart, clearCart, getTotalPrice } = useCart();
+  const { user } = useAuth();
 
   const [categories, setCategories] = useState([]);
   const [selectedDish, setSelectedDish] = useState(null);
   const [showToast, setShowToast] = useState(false);
-
-  const [cart, setCart] = useState([]);
-
-  const [user, setUser] = useState(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [orders, setOrders] = useState([]);
 
   const shippingFee = 0.99;
-  const itemsTotal = cart.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
-
-  useEffect(() => {
-    const savedCart = localStorage.getItem("cart");
-    if (savedCart) {
-      setCart(JSON.parse(savedCart));
-    }
-  }, []);
-
-  useEffect(() => {
-    if (cart.length === 0) {
-      localStorage.removeItem("cart");
-    } else {
-      localStorage.setItem("cart", JSON.stringify(cart));
-    }
-  }, [cart]);
-
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
+  const itemsTotal = getTotalPrice();
 
   const getCategories = async () => {
     try {
@@ -66,12 +41,6 @@ export default function MainPage({ isCartOpen, openCart, closeCart }) {
     fetchOrders();
   }, []);
 
-  const clearCart = () => {
-    console.log("CLEAR CART CALLED");
-    setCart([]);
-    localStorage.removeItem("cart");
-  };
-
   const handleAddToCart = (dish, count) => {
     const dishId = dish._id;
 
@@ -80,63 +49,30 @@ export default function MainPage({ isCartOpen, openCart, closeCart }) {
     setShowToast(true);
     setTimeout(() => setShowToast(false), 2000);
 
-    setCart((prev) => {
-      const existing = prev.find((item) => item.id === dishId);
-
-      if (existing) {
-        return prev.map((item) =>
-          item.id === dishId
-            ? { ...item, quantity: item.quantity + count }
-            : item
-        );
-      }
-
-      return [
-        ...prev,
-        {
-          id: dishId,
-          name: dish.foodName || dish.name,
-          price: dish.price,
-          image: dish.image,
-          description: dish.ingredients || "",
-          quantity: count,
-        },
-      ];
-    });
+    // Cart-д item нэмэх (count удаа)
+    for (let i = 0; i < count; i++) {
+      addToCart({
+        id: dishId,
+        name: dish.foodName || dish.name,
+        price: dish.price,
+        image: dish.image,
+        description: dish.ingredients || "",
+      });
+    }
 
     openCart();
   };
 
   const handleUpdateQty = (id, qty) => {
-    if (qty < 1) return;
-    setCart((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, quantity: qty } : item))
-    );
+    if (qty < 1) {
+      removeFromCart(id);
+      return;
+    }
+    updateQuantity(id, qty);
   };
 
   const handleRemoveItem = (id) => {
-    setCart((prev) => prev.filter((item) => item.id !== id));
-  };
-
-  const handleCheckout = async () => {
-    if (!user) return;
-    if (cart.length === 0) return;
-
-    try {
-      await axios.post("https://foodapp-back-k58d.onrender.com/api/orders", {
-        items: cart,
-        totalPrice: itemsTotal + shippingFee,
-        status: "pending",
-      });
-
-      setCart([]);
-
-      await fetchOrders();
-
-      setShowSuccess(true);
-    } catch (err) {
-      console.log("Checkout error:", err);
-    }
+    removeFromCart(id);
   };
 
   const fetchOrders = async () => {
@@ -226,25 +162,16 @@ export default function MainPage({ isCartOpen, openCart, closeCart }) {
       </div>
       <CartDrawer
         isOpen={isCartOpen}
-        cartItems={cart}
         onClose={closeCart}
-        onUpdateQty={handleUpdateQty}
-        onRemoveItem={handleRemoveItem}
-        onCheckout={handleCheckout}
         orders={orders}
-        onClearCart={clearCart}
       />
 
       {showSuccess && (
         <SuccessOrderModal
           onClose={() => {
             setShowSuccess(false);
-            setCart([]);
-            localStorage.setItem("cart", "[]");
-
-            setIsCartOpen(false);
-            localStorage.setItem("isCartOpen", "false");
-
+            clearCart();
+            closeCart();
             router.push("/");
           }}
         />

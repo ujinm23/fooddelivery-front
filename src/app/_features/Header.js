@@ -8,23 +8,15 @@ import Navigation from "../_icons/Navi";
 import Purchase from "../_icons/Purchase";
 import Right from "../_icons/Right";
 import { UserIcon } from "../_icons/UserIcon";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Header({ openCart }) {
   const router = useRouter();
-  const [user, setUser] = useState(null);
+  const { user, logout } = useAuth();
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (err) {
-        console.error("Failed to parse user from localStorage:", err);
-      }
-    }
-
     // Dropdown-ийг гадна дарахад хаах
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -37,9 +29,7 @@ export default function Header({ openCart }) {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    setUser(null);
+    logout();
     setShowDropdown(false);
     router.push("/");
   };
