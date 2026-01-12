@@ -37,7 +37,7 @@ export default function DishModal({ onClose, onAddDish, categoryName }) {
       setUploading(true);
       try {
         const base64 = reader.result;
-        const res = await axios.post("http://localhost:999/api/upload", {
+       const res = await axios.post("https://foodapp-back-k58d.onrender.com/api/upload", {
           data: base64,
         });
 

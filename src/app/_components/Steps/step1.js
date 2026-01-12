@@ -19,7 +19,7 @@ export default function Step1({ increaseStep }) {
     console.log("Step1 INCREASE email =", email);
 
     try {
-      const res = await fetch("http://localhost:999/api/auth/check-email", {
+        const res = await fetch("https://foodapp-back-k58d.onrender.com/api/auth/check-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),

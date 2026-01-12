@@ -16,7 +16,7 @@ export default function CartDrawer({
   const [orders, setOrders] = useState([]);
 
   const fetchOrders = async () => {
-    const res = await fetch("http://localhost:999/api/orders");
+    const res = await fetch("https://foodapp-back-k58d.onrender.com/api/orders");
     const json = await res.json();
     setOrders(json.data ?? json);
   };
@@ -41,7 +41,7 @@ export default function CartDrawer({
     };
 
     try {
-      const res = await fetch("http://localhost:999/api/orders", {
+      const res = await fetch("https://foodapp-back-k58d.onrender.com/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(orderData),

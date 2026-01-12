@@ -32,7 +32,7 @@ export default function Step2({ increaseStep, reduceStep, email }) {
     setErrorMsg("");
 
     try {
-      const res = await fetch("http://localhost:999/api/auth/sign-up", {
+       const res = await fetch("https://foodapp-back-k58d.onrender.com/api/auth/sign-up", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

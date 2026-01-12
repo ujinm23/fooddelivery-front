@@ -22,7 +22,7 @@ export default function Step3({ reduceStep }) {
     setError("");
 
     try {
-      const res = await fetch("http://127.0.0.1:999/api/auth/sign-in", {
+      const res = await fetch("https://foodapp-back-k58d.onrender.com/api/auth/sign-in", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

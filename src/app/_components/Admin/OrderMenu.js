@@ -20,7 +20,7 @@ export default function OrdersPage({ activeTab, setActiveTab }) {
 
   const fetchOrders = async () => {
     try {
-      const res = await fetch("http://localhost:999/api/orders");
+      const res = await fetch("https://foodapp-back-k58d.onrender.com/api/orders");
       const data = await res.json();
       setOrders(data);
     } catch (err) {
