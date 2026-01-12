@@ -22,13 +22,22 @@ export default function Step3({ reduceStep }) {
     setError("");
 
     try {
-      const res = await fetch("https://foodapp-back-k58d.onrender.com/api/auth/sign-in", {
+      const res = await fetch("https://foodapp-back-k58d.onrender.com/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
       console.log("STATUS =", res.status);
+
+      // Content-Type шалгах
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const text = await res.text();
+        console.error("Non-JSON response:", text);
+        setError("Server алдаа гарлаа. Дахин оролдоно уу.");
+        return;
+      }
 
       const data = await res.json();
       console.log("RESPONSE =", data);
@@ -38,12 +47,24 @@ export default function Step3({ reduceStep }) {
         return;
       }
 
-      localStorage.setItem("user", JSON.stringify(data.user));
+      // Хэрэглэгчийн мэдээллийг localStorage-д хадгалах
+      if (data.user) {
+        localStorage.setItem("user", JSON.stringify(data.user));
+      }
+      
+      // Token хадгалах (хэрэв байвал)
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+      }
 
       router.push("/");
     } catch (err) {
       console.log("FETCH ERROR:", err);
-      setError("Server error. Try again.");
+      if (err instanceof SyntaxError) {
+        setError("Server-ийн хариу буруу байна. Дахин оролдоно уу.");
+      } else {
+        setError("Server error. Try again.");
+      }
     }
   };
 

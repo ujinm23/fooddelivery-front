@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -8,6 +9,7 @@ import BackButton from "./BackButton";
 
 export default function Step2({ increaseStep, reduceStep, email }) {
   console.log("▶️ STEP2 RECEIVED EMAIL =", email);
+  const router = useRouter();
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [show, setShow] = useState(false);
@@ -38,6 +40,15 @@ export default function Step2({ increaseStep, reduceStep, email }) {
         body: JSON.stringify({ email, password }),
       });
 
+      // Content-Type шалгах
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const text = await res.text();
+        console.error("Non-JSON response:", text);
+        setErrorMsg("Server алдаа гарлаа. Дахин оролдоно уу.");
+        return;
+      }
+
       const data = await res.json();
 
       if (!res.ok) {
@@ -45,9 +56,25 @@ export default function Step2({ increaseStep, reduceStep, email }) {
         return;
       }
 
-      increaseStep();
+      // Хэрэглэгчийн мэдээллийг localStorage-д хадгалах
+      if (data.user) {
+        localStorage.setItem("user", JSON.stringify(data.user));
+      }
+      
+      // Token хадгалах (хэрэв байвал)
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+      }
+
+      // Home page руу redirect хийх
+      router.push("/");
     } catch (err) {
-      setErrorMsg("Server error. Try again.");
+      console.error("Sign up error:", err);
+      if (err instanceof SyntaxError) {
+        setErrorMsg("Server-ийн хариу буруу байна. Дахин оролдоно уу.");
+      } else {
+        setErrorMsg("Server error. Try again.");
+      }
     }
   };
 

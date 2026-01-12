@@ -1,8 +1,9 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import OrderDetail from "@/app/_icons/Orderdetail";
 import CartOrder from "./CartOrder";
 import toast from "react-hot-toast";
+import { orderApi } from "@/lib/api";
 
 export default function CartDrawer({
   isOpen,
@@ -14,12 +15,35 @@ export default function CartDrawer({
 }) {
   const [activeTab, setActiveTab] = useState("cart");
   const [orders, setOrders] = useState([]);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (err) {
+        console.error("Failed to parse user from localStorage:", err);
+      }
+    }
+  }, []);
 
   const fetchOrders = async () => {
-    const res = await fetch("https://foodapp-back-k58d.onrender.com/api/orders");
-    const json = await res.json();
-    setOrders(json.data ?? json);
+    try {
+      const userId = user?._id || user?.id;
+      const ordersData = await orderApi.getOrders(userId);
+      setOrders(ordersData);
+    } catch (err) {
+      console.error("Orders fetch error:", err);
+      toast.error("Захиалга авахад алдаа гарлаа");
+    }
   };
+
+  useEffect(() => {
+    if (user && activeTab === "orders") {
+      fetchOrders();
+    }
+  }, [user, activeTab]);
 
   const shippingFee = 0.99;
   const itemsTotal = cartItems.reduce(
@@ -29,10 +53,24 @@ export default function CartDrawer({
   const totalPrice = (itemsTotal + shippingFee).toFixed(2);
 
   const handleCheckout = async () => {
-    if (cartItems.length === 0) return;
+    if (cartItems.length === 0) {
+      toast.error("Сагс хоосон байна");
+      return;
+    }
+
+    if (!user) {
+      toast.error("Захиалга хийхийн тулд нэвтэрнэ үү");
+      return;
+    }
+
+    const userId = user._id || user.id;
+    if (!userId) {
+      toast.error("Хэрэглэгчийн мэдээлэл олдсонгүй");
+      return;
+    }
 
     const orderData = {
-      user: "64f123abc123abc123abc123",
+      user: userId,
       foodOrderItems: cartItems.map((item) => ({
         food: item.id,
         quantity: item.quantity,
@@ -41,25 +79,16 @@ export default function CartDrawer({
     };
 
     try {
-      const res = await fetch("https://foodapp-back-k58d.onrender.com/api/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(orderData),
-      });
-
-      if (!res.ok) {
-        toast.error("Checkout failed");
-        return;
-      }
+      const result = await orderApi.createOrder(orderData);
 
       await fetchOrders();
       onClearCart();
       setActiveTab("orders");
 
-      toast.success("Order placed successfully!"); // 🎉 ЭНД
+      toast.success(result.message || "Захиалга амжилттай үүслээ!");
     } catch (err) {
-      console.error(err);
-      toast.error("Something went wrong");
+      console.error("Checkout error:", err);
+      toast.error(err.message || "Захиалга үүсгэхэд алдаа гарлаа");
     }
   };
 

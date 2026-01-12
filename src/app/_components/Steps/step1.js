@@ -25,6 +25,15 @@ export default function Step1({ increaseStep }) {
         body: JSON.stringify({ email }),
       });
 
+      // Content-Type шалгах
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const text = await res.text();
+        console.error("Non-JSON response:", text);
+        setError("Server алдаа гарлаа. Дахин оролдоно уу.");
+        return;
+      }
+
       const data = await res.json();
 
       if (!res.ok) {
@@ -34,7 +43,12 @@ export default function Step1({ increaseStep }) {
 
       increaseStep({ email });
     } catch (err) {
-      setError("Server error. Try again.");
+      console.error("Check email error:", err);
+      if (err instanceof SyntaxError) {
+        setError("Server-ийн хариу буруу байна. Дахин оролдоно уу.");
+      } else {
+        setError("Server error. Try again.");
+      }
     }
   };
 
