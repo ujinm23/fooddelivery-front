@@ -26,6 +26,18 @@ export default function Order() {
   const [selectedDish, setSelectedDish] = useState(null);
   const [activeTab, setActiveTab] = useState("FoodMenu");
   const [newCategories, setNewCategories] = useState([]);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Responsive хийх
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+
+    checkScreenSize();
+    window.addEventListener("resize", checkScreenSize);
+    return () => window.removeEventListener("resize", checkScreenSize);
+  }, []);
 
   const getCategories = async () => {
     try {
@@ -43,7 +55,7 @@ export default function Order() {
   const handleAddCategory = async () => {
     if (!newCategory.trim()) return;
 
-    const res = await axios.post("http://localhost:999/api/categories", {
+    const res = await axios.post("https://foodapp-back-k58d.onrender.com/api/categories", {
       categoryName: newCategory.trim(),
     });
 
@@ -65,7 +77,7 @@ export default function Order() {
   const handleDeleteCategory = async (index) => {
     const categoryId = newCategories[index]._id;
     try {
-      await axios.delete(`http://localhost:999/api/categories/${categoryId}`);
+      await axios.delete(`https://foodapp-back-k58d.onrender.com/api/categories/${categoryId}`);
       setNewCategories(newCategories.filter((_, i) => i !== index));
       if (activeCategoryIndex === index) setActiveCategoryIndex(null);
     } catch (err) {
@@ -79,7 +91,7 @@ export default function Order() {
     try {
       const categoryId = newCategories[activeCategoryIndex]._id;
 
-      const dishRes = await axios.post("http://localhost:999/api/foods", {
+      const dishRes = await axios.post("https://foodapp-back-k58d.onrender.com/api/foods", {
         foodName: newDish.name,
         price: newDish.price,
         ingredients: newDish.ingredients,
@@ -115,7 +127,7 @@ export default function Order() {
     try {
       const dishId = newCategories[catIndex].dishes[dishIndex]._id;
 
-      await axios.delete(`http://localhost:999/api/foods/${dishId}`);
+      await axios.delete(`https://foodapp-back-k58d.onrender.com/api/foods/${dishId}`);
 
       const updated = [...newCategories];
       updated[catIndex].dishes = updated[catIndex].dishes.filter(
@@ -149,8 +161,8 @@ export default function Order() {
           )}
 
           {showCategoryModal && (
-            <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
-              <div className="bg-white p-6 rounded-xl w-[400px] relative">
+            <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50 overflow-y-auto">
+              <div className={`bg-white p-6 rounded-xl ${isMobile ? "w-[90%] max-w-[400px] m-4" : "w-[400px]"} relative`}>
                 <button
                   onClick={() => setShowCategoryModal(false)}
                   className="absolute top-3 right-4 cursor-pointer"
@@ -187,8 +199,8 @@ export default function Order() {
             />
           )}
 
-          <div className="mx-auto w-full max-w-[1440px] px-4 md:px-8 flex gap-10 pr-10">
-            <div className="w-[205px] p-9">
+          <div className={`mx-auto w-full max-w-[1440px] px-4 md:px-8 ${isMobile ? "flex-col h-screen flex" : "flex gap-10 pr-10"}`}>
+            <div className={`${isMobile ? "w-full p-4 flex-shrink-0 bg-white border-b" : "w-[205px] p-9"}`}>
               <div className="flex items-center gap-2">
                 <HutIcon />
                 <div>
@@ -222,12 +234,12 @@ export default function Order() {
               </button>
             </div>
 
-            <div className="w-full mt-8">
+            <div className={`${isMobile ? "w-full mt-4 overflow-y-auto flex-1 scrollbar-hide" : "w-full mt-8"}`}>
               <div className="flex justify-end mb-6">
                 <Avatar />
               </div>
 
-              <div className="border rounded-xl p-6 mb-6">
+              <div className={`border rounded-xl ${isMobile ? "p-4 mb-4" : "p-6 mb-6"}`}>
                 <h1 className="text-xl font-semibold mb-4">Dishes category</h1>
 
                 <div className="flex gap-3 flex-wrap">
@@ -300,13 +312,13 @@ export default function Order() {
                         {cat.categoryName} ({cat.dishes?.length || 0})
                       </h2>
 
-                      <div className="grid grid-cols-4 gap-5">
+                      <div className={`grid ${isMobile ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-4"} gap-5 overflow-x-auto`}>
                         <div
                           onClick={() => {
                             setActiveCategoryIndex(i);
                             setShowDishModal(true);
                           }}
-                          className="border-2 border-dashed border-red-500 rounded-xl w-[270px] h-[241px] flex justify-center items-center hover:bg-red-50 cursor-pointer"
+                          className={`border-2 border-dashed border-red-500 rounded-xl ${isMobile ? "w-full min-w-[200px]" : "w-[270px]"} h-[241px] flex justify-center items-center hover:bg-red-50 cursor-pointer`}
                         >
                           <button className="bg-red-500 w-9 cursor-pointer h-9 rounded-full flex justify-center items-center text-white">
                             <Plus />
@@ -316,7 +328,7 @@ export default function Order() {
                         {cat.dishes?.map((dish, dIndex) => (
                           <div
                             key={dIndex}
-                            className="relative border rounded-xl p-3 w-[270px] h-[241px] shadow"
+                            className={`relative border rounded-xl p-3 ${isMobile ? "w-full min-w-[200px]" : "w-[270px]"} h-[241px] shadow`}
                           >
                             <button
                               onClick={() => {

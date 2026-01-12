@@ -16,6 +16,7 @@ export default function CartDrawer({
   const [activeTab, setActiveTab] = useState("cart");
   const [orders, setOrders] = useState([]);
   const [user, setUser] = useState(null);
+  const [deliveryAddress, setDeliveryAddress] = useState("");
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -69,6 +70,11 @@ export default function CartDrawer({
       return;
     }
 
+    if (!deliveryAddress.trim()) {
+      toast.error("Хүргэлтийн хаяг оруулна уу");
+      return;
+    }
+
     const orderData = {
       user: userId,
       foodOrderItems: cartItems.map((item) => ({
@@ -76,6 +82,7 @@ export default function CartDrawer({
         quantity: item.quantity,
       })),
       totalPrice: Number(totalPrice),
+      address: deliveryAddress.trim(),
     };
 
     try {
@@ -83,6 +90,7 @@ export default function CartDrawer({
 
       await fetchOrders();
       onClearCart();
+      setDeliveryAddress(""); // Address цэвэрлэх
       setActiveTab("orders");
 
       toast.success(result.message || "Захиалга амжилттай үүслээ!");
@@ -214,6 +222,8 @@ export default function CartDrawer({
                   placeholder="Please share your complete address"
                   className="w-full h-20 border rounded-xl text-sm p-3"
                   type="text"
+                  value={deliveryAddress}
+                  onChange={(e) => setDeliveryAddress(e.target.value)}
                 />
               </div>
             </div>
@@ -244,7 +254,28 @@ export default function CartDrawer({
           </>
         )}
 
-        {activeTab === "orders" && <CartOrder orders={orders} />}
+        {activeTab === "orders" && (
+          <>
+            {!user ? (
+              <div className="bg-white flex-1 p-6 rounded-2xl flex flex-col items-center justify-center">
+                <p className="text-gray-500 text-center mb-4">
+                  Захиалгын түүх харахын тулд нэвтэрнэ үү
+                </p>
+                <button
+                  onClick={() => {
+                    setActiveTab("cart");
+                    window.location.href = "/login";
+                  }}
+                  className="px-6 py-2 bg-[#EF4444] text-white rounded-full hover:bg-[#dc2626] transition-colors"
+                >
+                  Login
+                </button>
+              </div>
+            ) : (
+              <CartOrder orders={orders} />
+            )}
+          </>
+        )}
       </div>
     </div>
   );

@@ -1,3 +1,7 @@
+"use client";
+
+import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import CompanyName from "../_icons/CompanyName";
 import HutIcon from "../_icons/HutIcon";
 import Navigation from "../_icons/Navi";
@@ -6,6 +10,45 @@ import Right from "../_icons/Right";
 import { UserIcon } from "../_icons/UserIcon";
 
 export default function Header({ openCart }) {
+  const router = useRouter();
+  const [user, setUser] = useState(null);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (err) {
+        console.error("Failed to parse user from localStorage:", err);
+      }
+    }
+
+    // Dropdown-ийг гадна дарахад хаах
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    setUser(null);
+    setShowDropdown(false);
+    router.push("/");
+  };
+
+  const handleLogin = () => {
+    setShowDropdown(false);
+    router.push("/login");
+  };
+
   return (
     <div className="w-full bg-[#18181B] h-[68px] flex justify-center">
       <div className="w-full max-w-[1440px] h-full flex justify-between items-center px-[88px]">
@@ -37,8 +80,45 @@ export default function Header({ openCart }) {
             <Purchase />
           </div>
 
-          <div className="rounded-[50px] bg-[#EF4444] w-9 h-9 flex items-center justify-center">
-            <UserIcon />
+          <div className="relative" ref={dropdownRef}>
+            <div
+              onClick={() => setShowDropdown(!showDropdown)}
+              className="rounded-[50px] bg-[#EF4444] w-9 h-9 flex items-center justify-center cursor-pointer hover:bg-[#dc2626] transition-colors"
+            >
+              <UserIcon />
+            </div>
+
+            {showDropdown && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                <div className="py-1">
+                  {user ? (
+                    <>
+                      <div className="px-4 py-2 border-b border-gray-200">
+                        <p className="text-sm font-semibold text-gray-900">
+                          {user.firstName || user.email || "User"}
+                        </p>
+                        <p className="text-xs text-gray-500 truncate">
+                          {user.email}
+                        </p>
+                      </div>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                      >
+                        Logout
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      onClick={handleLogin}
+                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                    >
+                      Login
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
