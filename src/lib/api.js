@@ -17,11 +17,11 @@ export const signUpApi = {
 };
 
 export const orderApi = {
-  createOrder: async ({ user, foodOrderItems, totalPrice }) => {
+  createOrder: async ({ user, foodOrderItems, totalPrice, address }) => {
     const res = await fetch("https://foodapp-back-k58d.onrender.com/api/orders", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user, foodOrderItems, totalPrice }),
+      body: JSON.stringify({ user, foodOrderItems, totalPrice, address }),
     });
     
     if (!res.ok) {

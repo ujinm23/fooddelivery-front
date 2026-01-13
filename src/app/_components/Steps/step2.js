@@ -144,7 +144,7 @@ export default function Step2({ increaseStep, reduceStep, email }) {
           </div>
 
           <div className="flex items-center gap-2 mb-6">
-            <Checkbox id="show" onCheckedChange={(v) => setShow(v)} />
+            <Checkbox id="show" checked={show} onCheckedChange={(v) => setShow(v)} />
             <label
               htmlFor="show"
               className="text-sm text-gray-600 cursor-pointer"

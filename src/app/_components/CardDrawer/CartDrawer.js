@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import OrderDetail from "@/app/_icons/Orderdetail";
 import CartOrder from "./CartOrder";
 import toast from "react-hot-toast";
@@ -22,23 +22,26 @@ export default function CartDrawer({
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [showLoginModal, setShowLoginModal] = useState(false);
 
+  const fetchOrders = useCallback(async () => {
+    try {
+      const userId = getUserId();
+      if (!userId) return;
+      const ordersData = await orderApi.getOrders(userId);
+      setOrders(ordersData);
+    } catch (err) {
+      console.error("Orders fetch error:", err);
+      toast.error("Захиалга авахад алдаа гарлаа");
+    }
+  }, [getUserId]);
+
   useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const userId = getUserId();
-        if (!userId) return;
-        const ordersData = await orderApi.getOrders(userId);
-        setOrders(ordersData);
-      } catch (err) {
-        console.error("Orders fetch error:", err);
-        toast.error("Захиалга авахад алдаа гарлаа");
+    const loadOrders = async () => {
+      if (isAuthenticated() && activeTab === "orders") {
+        await fetchOrders();
       }
     };
-
-    if (isAuthenticated() && activeTab === "orders") {
-      fetchOrders();
-    }
-  }, [user, activeTab, isAuthenticated, getUserId]);
+    loadOrders();
+  }, [user, activeTab, isAuthenticated, fetchOrders]);
 
   const shippingFee = 0.99;
   const itemsTotal = getTotalPrice();
