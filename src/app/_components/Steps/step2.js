@@ -6,10 +6,12 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import BackButton from "./BackButton";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Step2({ increaseStep, reduceStep, email }) {
   console.log("▶️ STEP2 RECEIVED EMAIL =", email);
   const router = useRouter();
+  const { login } = useAuth();
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [show, setShow] = useState(false);
@@ -56,14 +58,14 @@ export default function Step2({ increaseStep, reduceStep, email }) {
         return;
       }
 
-      // Хэрэглэгчийн мэдээллийг localStorage-д хадгалах
+      // Хэрэглэгчийн мэдээллийг AuthContext-д хадгалах (localStorage болон state хоёуланг нь шинэчлэнэ)
       if (data.user) {
-        localStorage.setItem("user", JSON.stringify(data.user));
-      }
-      
-      // Token хадгалах (хэрэв байвал)
-      if (data.token) {
-        localStorage.setItem("token", data.token);
+        login(data.user, data.token || null);
+      } else {
+        // Хэрэв user мэдээлэл байхгүй бол зөвхөн token хадгалах
+        if (data.token) {
+          login(null, data.token);
+        }
       }
 
       // Home page руу redirect хийх

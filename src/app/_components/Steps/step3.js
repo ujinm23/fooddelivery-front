@@ -6,9 +6,11 @@ import BackButton from "./BackButton";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Step3({ reduceStep }) {
   const router = useRouter();
+  const { login } = useAuth();
 
   const [show, setShow] = useState(false);
   const [email, setEmail] = useState("");
@@ -47,14 +49,14 @@ export default function Step3({ reduceStep }) {
         return;
       }
 
-      // Хэрэглэгчийн мэдээллийг localStorage-д хадгалах
+      // Хэрэглэгчийн мэдээллийг AuthContext-д хадгалах (localStorage болон state хоёуланг нь шинэчлэнэ)
       if (data.user) {
-        localStorage.setItem("user", JSON.stringify(data.user));
-      }
-      
-      // Token хадгалах (хэрэв байвал)
-      if (data.token) {
-        localStorage.setItem("token", data.token);
+        login(data.user, data.token || null);
+      } else {
+        // Хэрэв user мэдээлэл байхгүй бол зөвхөн token хадгалах
+        if (data.token) {
+          login(null, data.token);
+        }
       }
 
       router.push("/");
