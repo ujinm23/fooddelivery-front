@@ -16,32 +16,27 @@ export default function CartDrawer({
   const { user, getUserId, isAuthenticated } = useAuth();
   
   const [activeTab, setActiveTab] = useState("cart");
-  const [orders, setOrders] = useState(externalOrders || []);
+  // Initialize from prop, but state will be managed independently
+  const [orders, setOrders] = useState(() => externalOrders || []);
   const [deliveryAddress, setDeliveryAddress] = useState("");
 
   useEffect(() => {
-    if (externalOrders) {
-      setOrders(externalOrders);
-    }
-  }, [externalOrders]);
+    const fetchOrders = async () => {
+      try {
+        const userId = getUserId();
+        if (!userId) return;
+        const ordersData = await orderApi.getOrders(userId);
+        setOrders(ordersData);
+      } catch (err) {
+        console.error("Orders fetch error:", err);
+        toast.error("Захиалга авахад алдаа гарлаа");
+      }
+    };
 
-  const fetchOrders = async () => {
-    try {
-      const userId = getUserId();
-      if (!userId) return;
-      const ordersData = await orderApi.getOrders(userId);
-      setOrders(ordersData);
-    } catch (err) {
-      console.error("Orders fetch error:", err);
-      toast.error("Захиалга авахад алдаа гарлаа");
-    }
-  };
-
-  useEffect(() => {
     if (isAuthenticated() && activeTab === "orders") {
       fetchOrders();
     }
-  }, [user, activeTab]);
+  }, [user, activeTab, isAuthenticated, getUserId]);
 
   const shippingFee = 0.99;
   const itemsTotal = getTotalPrice();

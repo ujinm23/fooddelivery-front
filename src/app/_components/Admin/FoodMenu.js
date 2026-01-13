@@ -39,16 +39,15 @@ export default function Order() {
     return () => window.removeEventListener("resize", checkScreenSize);
   }, []);
 
-  const getCategories = async () => {
-    try {
-      const res = await axios.get("https://foodapp-back-k58d.onrender.com/api/categories");
-      setNewCategories(res.data);
-    } catch (err) {
-      console.log("Error loading categories:", err);
-    }
-  };
-
   useEffect(() => {
+    const getCategories = async () => {
+      try {
+        const res = await axios.get("https://foodapp-back-k58d.onrender.com/api/categories");
+        setNewCategories(res.data);
+      } catch (err) {
+        console.log("Error loading categories:", err);
+      }
+    };
     getCategories();
   }, []);
 

@@ -5,29 +5,26 @@ import { createContext, useContext, useState, useEffect } from "react";
 const AuthContext = createContext(undefined);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  // localStorage-аас user болон token-ийг унших
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    const storedToken = localStorage.getItem("token");
-
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (err) {
-        console.error("Failed to parse user from localStorage:", err);
+  const [user, setUser] = useState(() => {
+    if (typeof window !== "undefined") {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        try {
+          return JSON.parse(storedUser);
+        } catch (err) {
+          console.error("Failed to parse user from localStorage:", err);
+        }
       }
     }
-
-    if (storedToken) {
-      setToken(storedToken);
+    return null;
+  });
+  const [token, setToken] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("token");
     }
-
-    setLoading(false);
-  }, []);
+    return null;
+  });
+  const [loading] = useState(false);
 
   // User нэвтрэх
   const login = (userData, authToken) => {

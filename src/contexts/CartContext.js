@@ -5,19 +5,19 @@ import { createContext, useContext, useState, useEffect } from "react";
 const CartContext = createContext(undefined);
 
 export function CartProvider({ children }) {
-  const [cartItems, setCartItems] = useState([]);
-
-  // localStorage-аас cart-ийг унших
-  useEffect(() => {
-    const savedCart = localStorage.getItem("cart");
-    if (savedCart) {
-      try {
-        setCartItems(JSON.parse(savedCart));
-      } catch (err) {
-        console.error("Failed to parse cart from localStorage:", err);
+  const [cartItems, setCartItems] = useState(() => {
+    if (typeof window !== "undefined") {
+      const savedCart = localStorage.getItem("cart");
+      if (savedCart) {
+        try {
+          return JSON.parse(savedCart);
+        } catch (err) {
+          console.error("Failed to parse cart from localStorage:", err);
+        }
       }
     }
-  }, []);
+    return [];
+  });
 
   // Cart-ийг localStorage-д хадгалах
   useEffect(() => {
