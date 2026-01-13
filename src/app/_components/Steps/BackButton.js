@@ -7,7 +7,7 @@ export default function BackButton({ onClick }) {
       onClick={onClick}
       variant="ghost"
       size="icon"
-      className="rounded-xl border h-10 w-10"
+      className="rounded-xl border h-10 w-10 cursor-pointer"
     >
       <ChevronLeft className="h-5 w-5" />
     </Button>

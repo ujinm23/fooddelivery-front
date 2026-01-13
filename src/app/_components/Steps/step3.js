@@ -84,7 +84,7 @@ export default function Step3({ reduceStep }) {
       <div className="flex items-center justify-center w-1/2 bg-white">
         <div className="w-full max-w-[416px]">
           <div className="mb-6">
-            <BackButton onClick={() => reduceStep(2)} />
+            <BackButton onClick={() => router.push("/")} />
           </div>
 
           <div className="mb-6">

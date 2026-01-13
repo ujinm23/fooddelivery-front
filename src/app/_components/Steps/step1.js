@@ -3,11 +3,13 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import BackButton from "./BackButton";
+import { useRouter } from "next/navigation";
 
 import { MailIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function Step1({ increaseStep }) {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [touched, setTouched] = useState(false);
   const [error, setError] = useState("");
@@ -57,7 +59,7 @@ export default function Step1({ increaseStep }) {
       <div className="flex items-center justify-center w-1/2">
         <div className="w-full max-w-[416px]">
           <div className="mb-6">
-            <BackButton />
+            <BackButton onClick={() => router.push("/")} />
           </div>
 
           <div className="mb-6">
