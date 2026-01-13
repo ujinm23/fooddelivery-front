@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import { orderApi } from "@/lib/api";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
+import LoginModal from "../LoginModal/LoginModal";
 
 export default function CartDrawer({
   isOpen,
@@ -19,6 +20,7 @@ export default function CartDrawer({
   // Initialize from prop, but state will be managed independently
   const [orders, setOrders] = useState(() => externalOrders || []);
   const [deliveryAddress, setDeliveryAddress] = useState("");
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -49,7 +51,7 @@ export default function CartDrawer({
     }
 
     if (!isAuthenticated()) {
-      toast.error("Захиалга хийхийн тулд нэвтэрнэ үү");
+      setShowLoginModal(true);
       return;
     }
 
@@ -266,6 +268,10 @@ export default function CartDrawer({
           </>
         )}
       </div>
+
+      {showLoginModal && (
+        <LoginModal onClose={() => setShowLoginModal(false)} />
+      )}
     </div>
   );
 }
