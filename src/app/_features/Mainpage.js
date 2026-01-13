@@ -9,6 +9,7 @@ import SuccessOrderModal from "../_components/SuccessOrderModal/SuccessOrderModa
 import { useRouter } from "next/navigation";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
+import CategorySkeleton from "../_components/Skeleton/CategorySkeleton";
 
 export default function MainPage({ isCartOpen, openCart, closeCart }) {
   const router = useRouter();
@@ -21,6 +22,7 @@ export default function MainPage({ isCartOpen, openCart, closeCart }) {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const shippingFee = 0.99;
   const itemsTotal = getTotalPrice();
@@ -28,12 +30,15 @@ export default function MainPage({ isCartOpen, openCart, closeCart }) {
   useEffect(() => {
     const getCategories = async () => {
       try {
+        setLoading(true);
         const res = await axios.get(
           "https://foodapp-back-k58d.onrender.com/api/categories"
         );
         setCategories(res.data);
       } catch (err) {
         console.log("Category load error:", err);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -120,49 +125,56 @@ export default function MainPage({ isCartOpen, openCart, closeCart }) {
 
       <div className="bg-[#18181B] flex justify-center">
         <div className="w-full max-w-[1440px] py-[88px] px-10">
-          {categories.map((category, index) => (
-            <div key={index} className="mb-20">
-              <h2 className="text-white font-semibold text-3xl mb-10">
-                {category.categoryName}
-              </h2>
+          {loading ? (
+            <>
+              <CategorySkeleton />
+              <CategorySkeleton />
+            </>
+          ) : (
+            categories.map((category, index) => (
+              <div key={index} className="mb-20">
+                <h2 className="text-white font-semibold text-3xl mb-10">
+                  {category.categoryName}
+                </h2>
 
-              <div className="grid grid-cols-3 gap-6">
-                {category.dishes?.map((dish, dIndex) => (
-                  <div
-                    key={dIndex}
-                    className="relative rounded-xl bg-white p-3 shadow-lg"
-                  >
-                    <img
-                      src={dish.image}
-                      className="w-full h-[210px] rounded-lg object-cover"
-                      alt=""
-                    />
-
-                    <button
-                      onClick={() => setSelectedDish(dish)}
-                      className="absolute top-44 right-6 bg-white text-red-500 
-                                 border cursor-pointer w-8 h-8 rounded-full 
-                                 flex items-center justify-center 
-                                 hover:bg-red-500 hover:text-white transition"
+                <div className="grid grid-cols-3 gap-6">
+                  {category.dishes?.map((dish, dIndex) => (
+                    <div
+                      key={dIndex}
+                      className="relative rounded-xl bg-white p-3 shadow-lg"
                     >
-                      +
-                    </button>
+                      <img
+                        src={dish.image}
+                        className="w-full h-[210px] rounded-lg object-cover"
+                        alt=""
+                      />
 
-                    <div className="flex justify-between mt-2">
-                      <p className="text-red-500 font-semibold mb-2">
-                        {dish.foodName}
+                      <button
+                        onClick={() => setSelectedDish(dish)}
+                        className="absolute top-44 right-6 bg-white text-red-500 
+                                   border cursor-pointer w-8 h-8 rounded-full 
+                                   flex items-center justify-center 
+                                   hover:bg-red-500 hover:text-white transition"
+                      >
+                        +
+                      </button>
+
+                      <div className="flex justify-between mt-2">
+                        <p className="text-red-500 font-semibold mb-2">
+                          {dish.foodName}
+                        </p>
+                        <p className="font-bold">${dish.price}</p>
+                      </div>
+
+                      <p className="text-xs text-gray-500 line-clamp-3 mb-2">
+                        {dish.ingredients}
                       </p>
-                      <p className="font-bold">${dish.price}</p>
                     </div>
-
-                    <p className="text-xs text-gray-500 line-clamp-3 mb-2">
-                      {dish.ingredients}
-                    </p>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
       <div>

@@ -7,6 +7,7 @@ import CarWhiteIcon from "@/app/_icons/CarWhiteIcon";
 import Sqr from "@/app/_icons/squer";
 import CarBlack from "@/app/_icons/Car";
 import OrderCN from "@/app/_icons/ordercn";
+import OrderTableSkeleton from "../Skeleton/OrderTableSkeleton";
 
 export default function OrdersPage({ activeTab, setActiveTab }) {
   const [orders, setOrders] = useState([]);
@@ -191,11 +192,7 @@ export default function OrdersPage({ activeTab, setActiveTab }) {
             </thead>
             <tbody>
               {loading ? (
-                <tr>
-                  <td colSpan="7" className="p-6 text-center text-gray-500">
-                    Loading...
-                  </td>
-                </tr>
+                <OrderTableSkeleton rows={itemsPerPage} />
               ) : orders.length === 0 ? (
                 <tr>
                   <td colSpan="7" className="p-6 text-center text-gray-500">
