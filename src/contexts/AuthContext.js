@@ -60,6 +60,11 @@ export function AuthProvider({ children }) {
     return user?._id || user?.id || null;
   };
 
+  // Admin эрхтэй эсэхийг шалгах
+  const isAdmin = () => {
+    return user?.role === "admin";
+  };
+
   const value = {
     user,
     token,
@@ -69,6 +74,7 @@ export function AuthProvider({ children }) {
     updateUser,
     isAuthenticated,
     getUserId,
+    isAdmin,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

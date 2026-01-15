@@ -60,11 +60,16 @@ export default function Step2({ increaseStep, reduceStep, email }) {
 
       // Хэрэглэгчийн мэдээллийг AuthContext-д хадгалах (localStorage болон state хоёуланг нь шинэчлэнэ)
       if (data.user) {
-        login(data.user, data.token || null);
+        // Backend-аас accessToken эсвэл token буцааж байна
+        const token = data.accessToken || data.token || null;
+        login(data.user, token);
+        console.log("✅ User мэдээлэл хадгалагдлаа:", data.user);
+        console.log("   Role:", data.user.role);
       } else {
         // Хэрэв user мэдээлэл байхгүй бол зөвхөн token хадгалах
-        if (data.token) {
-          login(null, data.token);
+        const token = data.accessToken || data.token || null;
+        if (token) {
+          login(null, token);
         }
       }
 

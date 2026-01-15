@@ -12,7 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 export default function Header({ openCart }) {
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, logout, isAdmin } = useAuth();
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -37,6 +37,16 @@ export default function Header({ openCart }) {
   const handleLogin = () => {
     setShowDropdown(false);
     router.push("/login");
+  };
+
+  const handleSignUp = () => {
+    setShowDropdown(false);
+    router.push("/sign-up");
+  };
+
+  const handleAdminPanel = () => {
+    setShowDropdown(false);
+    router.push("/admin");
   };
 
   return (
@@ -91,6 +101,14 @@ export default function Header({ openCart }) {
                           {user.email}
                         </p>
                       </div>
+                      {isAdmin() && (
+                        <button
+                          onClick={handleAdminPanel}
+                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors border-b border-gray-200"
+                        >
+                          Admin Panel
+                        </button>
+                      )}
                       <button
                         onClick={handleLogout}
                         className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
@@ -99,12 +117,20 @@ export default function Header({ openCart }) {
                       </button>
                     </>
                   ) : (
-                    <button
-                      onClick={handleLogin}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-                    >
-                      Login
-                    </button>
+                    <>
+                      <button
+                        onClick={handleLogin}
+                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                      >
+                        Login
+                      </button>
+                      <button
+                        onClick={handleSignUp}
+                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors border-t border-gray-200"
+                      >
+                        Sign up
+                      </button>
+                    </>
                   )}
                 </div>
               </div>
