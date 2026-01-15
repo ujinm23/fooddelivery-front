@@ -49,10 +49,17 @@ export default function Header({ openCart }) {
     router.push("/admin");
   };
 
+  const handleLogoClick = () => {
+    router.push("/");
+  };
+
   return (
     <div className="w-full bg-[#18181B] h-[68px] flex justify-center">
       <div className="w-full max-w-[1440px] h-full flex justify-between items-center px-[88px]">
-        <div className="flex items-center gap-3">
+        <div 
+          onClick={handleLogoClick}
+          className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+        >
           <HutIcon />
 
           <div>
