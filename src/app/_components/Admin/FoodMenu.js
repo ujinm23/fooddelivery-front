@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Avatar from "@/app/_icons/Avatar";
 import CarBlack from "@/app/_icons/Car";
 import CompanyNew from "@/app/_icons/CompanyNew";
@@ -17,6 +18,7 @@ import CarWhiteIcon from "@/app/_icons/CarWhiteIcon";
 import OrdersPage from "./OrderMenu";
 
 export default function Order() {
+  const router = useRouter();
   const [showDishModal, setShowDishModal] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [newCategory, setNewCategory] = useState("");
@@ -200,7 +202,10 @@ export default function Order() {
 
           <div className={`mx-auto w-full max-w-[1440px] px-4 md:px-8 ${isMobile ? "flex-col h-screen flex" : "flex gap-10 pr-10"}`}>
             <div className={`${isMobile ? "w-full p-4 flex-shrink-0 bg-white border-b" : "w-[205px] p-9"}`}>
-              <div className="flex items-center gap-2">
+              <div 
+                onClick={() => router.push("/")}
+                className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+              >
                 <HutIcon />
                 <div>
                   <CompanyNew />

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import HutIcon from "@/app/_icons/HutIcon";
 import SqrWhite from "@/app/_icons/sqrblack";
 import CarWhiteIcon from "@/app/_icons/CarWhiteIcon";
@@ -10,6 +11,7 @@ import OrderCN from "@/app/_icons/ordercn";
 import OrderTableSkeleton from "../Skeleton/OrderTableSkeleton";
 
 export default function OrdersPage({ activeTab, setActiveTab }) {
+  const router = useRouter();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fromDate, setFromDate] = useState("");
@@ -121,7 +123,10 @@ export default function OrdersPage({ activeTab, setActiveTab }) {
     <div className={`mx-auto w-full max-w-[1440px] px-4 md:px-8 ${isMobile ? "flex-col" : "flex gap-10 pr-10"}`}>
       {/* Sidebar */}
       <div className="w-[205px] p-9">
-        <div className="flex items-center gap-2">
+        <div 
+          onClick={() => router.push("/")}
+          className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+        >
           <div className="w-10 h-10">
             <HutIcon />
           </div>
