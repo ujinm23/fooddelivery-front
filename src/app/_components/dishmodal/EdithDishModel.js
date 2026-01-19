@@ -105,8 +105,13 @@ export default function EditDishModal({
         {/* DELETE + SAVE */}
         <div className="flex justify-between">
           <button
-            onClick={() => onDeleteDish(dish.catIndex, dish.dishIndex)}
-            className="w-12 h-10 border cursor-pointer  border-[#EF4444] rounded-md text-[#EF4444] flex justify-center items-center"
+            onClick={() => {
+              if (window.confirm(`Are you sure you want to delete "${dish.foodName}"?`)) {
+                onDeleteDish(dish.catIndex, dish.dishIndex);
+                onClose();
+              }
+            }}
+            className="w-12 h-10 border cursor-pointer  border-[#EF4444] rounded-md text-[#EF4444] flex justify-center items-center hover:bg-red-50 transition-colors"
           >
             <DeleteIcon />
           </button>

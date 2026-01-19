@@ -114,7 +114,12 @@ export default function Step1({ increaseStep }) {
 
           <p className="text-[#71717A] text-center">
             Already have an account?{" "}
-            <span className="text-[#2563EB] cursor-pointer">Log in</span>
+            <span 
+              className="text-[#2563EB] cursor-pointer hover:underline"
+              onClick={() => router.push("/login")}
+            >
+              Log in
+            </span>
           </p>
         </div>
       </div>

@@ -29,9 +29,11 @@ export default function Order() {
   const [activeTab, setActiveTab] = useState("FoodMenu");
   const [newCategories, setNewCategories] = useState([]);
   const [isMobile, setIsMobile] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  // Responsive хийх
+  // Responsive хийх - hydration алдааг засах
   useEffect(() => {
+    setMounted(true);
     const checkScreenSize = () => {
       setIsMobile(window.innerWidth < 1024);
     };
@@ -87,10 +89,30 @@ export default function Order() {
   };
 
   const handleAddDish = async (newDish) => {
-    if (activeCategoryIndex === null) return;
+    if (activeCategoryIndex === null) {
+      toast.error("Please select a category first", {
+        duration: 2000,
+        style: {
+          background: "#111",
+          color: "#fff",
+        },
+      });
+      return;
+    }
 
     try {
       const categoryId = newCategories[activeCategoryIndex]._id;
+      
+      if (!categoryId) {
+        toast.error("Category not found", {
+          duration: 2000,
+          style: {
+            background: "#111",
+            color: "#fff",
+          },
+        });
+        return;
+      }
 
       const dishRes = await axios.post("https://foodapp-back-k58d.onrender.com/api/foods", {
         foodName: newDish.name,
@@ -127,6 +149,7 @@ export default function Order() {
   const handleDeleteDish = async (catIndex, dishIndex) => {
     try {
       const dishId = newCategories[catIndex].dishes[dishIndex]._id;
+      const dishName = newCategories[catIndex].dishes[dishIndex].foodName;
 
       await axios.delete(`https://foodapp-back-k58d.onrender.com/api/foods/${dishId}`);
 
@@ -136,8 +159,23 @@ export default function Order() {
       );
 
       setNewCategories(updated);
+      
+      toast.success(`"${dishName}" deleted successfully`, {
+        duration: 2000,
+        style: {
+          background: "#111",
+          color: "#fff",
+        },
+      });
     } catch (err) {
       console.log("DELETE dish ERROR:", err.response?.data || err);
+      toast.error("Failed to delete dish", {
+        duration: 2000,
+        style: {
+          background: "#111",
+          color: "#fff",
+        },
+      });
     }
   };
 
@@ -310,8 +348,14 @@ export default function Order() {
                   : [newCategories[activeCategoryIndex]]
                 )
                   .filter(Boolean)
-                  .map((cat, i) => (
-                    <div key={i} className="bg-white p-6 border rounded-xl">
+                  .map((cat, i) => {
+                    // Get the actual category index from newCategories array
+                    const actualCatIndex = showAllDishes 
+                      ? newCategories.findIndex(c => c._id === cat._id)
+                      : activeCategoryIndex;
+                    
+                    return (
+                    <div key={cat._id || i} className="bg-white p-6 border rounded-xl">
                       <h2 className="text-lg font-semibold mb-4">
                         {cat.categoryName} ({cat.dishes?.length || 0})
                       </h2>
@@ -319,7 +363,7 @@ export default function Order() {
                       <div className={`grid ${isMobile ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-4"} gap-5 overflow-x-auto`}>
                         <div
                           onClick={() => {
-                            setActiveCategoryIndex(i);
+                            setActiveCategoryIndex(actualCatIndex);
                             setShowDishModal(true);
                           }}
                           className={`border-2 border-dashed border-red-500 rounded-xl ${isMobile ? "w-full min-w-[200px]" : "w-[270px]"} h-[241px] flex justify-center items-center hover:bg-red-50 cursor-pointer`}
@@ -338,7 +382,7 @@ export default function Order() {
                               onClick={() => {
                                 setSelectedDish({
                                   ...dish,
-                                  catIndex: i,
+                                  catIndex: actualCatIndex,
                                   dishIndex: dIndex,
                                 });
                                 setShowEditModal(true);
@@ -367,7 +411,8 @@ export default function Order() {
                         ))}
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
               </div>
             </div>
           </div>
