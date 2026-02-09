@@ -8,7 +8,7 @@ const Right = (props) => (
     {...props}
   >
     <path
-      stroke="#18181B"
+      stroke="#404040"
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeOpacity={0.5}

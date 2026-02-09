@@ -67,7 +67,7 @@ export default function FoodDetailModal({ dish, onClose, onAddToCart }) {
               onAddToCart(dish, count);
               onClose();
             }}
-            className="w-full h-11 bg-[#18181B] text-white rounded-full cursor-pointer mt-6"
+            className="w-full h-11 bg-[#404040] text-white rounded-full cursor-pointer mt-6"
           >
             Add to cart
           </button>

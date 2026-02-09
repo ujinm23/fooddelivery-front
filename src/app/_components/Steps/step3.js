@@ -26,11 +26,14 @@ export default function Step3({ reduceStep }) {
     setLoading(true);
 
     try {
-      const res = await fetch("https://foodapp-back-k58d.onrender.com/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+      const res = await fetch(
+        "https://fooddelivery-back-qe16.onrender.com/api/auth/login",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        },
+      );
 
       console.log("STATUS =", res.status);
 
@@ -152,7 +155,7 @@ export default function Step3({ reduceStep }) {
             disabled={!validEmail || !password || loading}
             className={`w-[416px] h-9 mb-6 cursor-pointer ${
               validEmail && password && !loading
-                ? "bg-[#18181B] text-white"
+                ? "bg-[#404040] text-white"
                 : "bg-gray-300 text-gray-500"
             }`}
           >

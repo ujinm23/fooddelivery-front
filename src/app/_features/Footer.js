@@ -5,9 +5,9 @@ import Instagram from "../_icons/Instagram";
 
 const Footer = () => {
   return (
-    <div className="w-full bg-[#18181B] pt-[60px] flex justify-center">
+    <div className="w-auto bg-[#18181B] pt-[60px] flex justify-center">
       <div className="w-full max-w-[1440px]">
-        <div className="w-full h-[92px] bg-[#EF4444] flex items-center gap-[34px]">
+        <div className="w-auto h-[92px] bg-[#EF4444] flex items-center gap-[34px]">
           <p className="text-[30px] font-semibold text-white ml-[98px]">
             Fresh fast delivered
           </p>

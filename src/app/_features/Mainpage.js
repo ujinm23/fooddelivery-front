@@ -13,7 +13,14 @@ import CategorySkeleton from "../_components/Skeleton/CategorySkeleton";
 
 export default function MainPage({ isCartOpen, openCart, closeCart }) {
   const router = useRouter();
-  const { cartItems, addToCart, updateQuantity, removeFromCart, clearCart, getTotalPrice } = useCart();
+  const {
+    cartItems,
+    addToCart,
+    updateQuantity,
+    removeFromCart,
+    clearCart,
+    getTotalPrice,
+  } = useCart();
   const { user } = useAuth();
 
   const [categories, setCategories] = useState([]);
@@ -32,7 +39,7 @@ export default function MainPage({ isCartOpen, openCart, closeCart }) {
       try {
         setLoading(true);
         const res = await axios.get(
-          "https://foodapp-back-k58d.onrender.com/api/categories"
+          "https://fooddelivery-back-qe16.onrender.com/api/categories",
         );
         setCategories(res.data);
       } catch (err) {
@@ -113,8 +120,8 @@ export default function MainPage({ isCartOpen, openCart, closeCart }) {
         />
       )}
 
-      <div className="w-full h-[570px] flex justify-center  bg-[#18181B]">
-        <div className="w-full max-w-[1440px] h-full">
+      <div className="w-full h-[668px] flex justify-center  bg-[#404040]">
+        <div className=" w-screen h-full">
           <img
             src="/BG.svg"
             alt="background"
@@ -123,7 +130,7 @@ export default function MainPage({ isCartOpen, openCart, closeCart }) {
         </div>
       </div>
 
-      <div className="bg-[#18181B] flex justify-center">
+      <div className="bg-[#404040] flex justify-center">
         <div className="w-full max-w-[1440px] py-[88px] px-10">
           {loading ? (
             <>
@@ -180,11 +187,7 @@ export default function MainPage({ isCartOpen, openCart, closeCart }) {
       <div>
         {showToast && <Toast message="Food is being added to the cart!" />}
       </div>
-      <CartDrawer
-        isOpen={isCartOpen}
-        onClose={closeCart}
-        orders={orders}
-      />
+      <CartDrawer isOpen={isCartOpen} onClose={closeCart} orders={orders} />
 
       {showSuccess && (
         <SuccessOrderModal

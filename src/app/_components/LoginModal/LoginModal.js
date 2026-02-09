@@ -4,7 +4,7 @@ export default function LoginModal({ onClose }) {
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-[9999]">
       <div className="bg-white p-6 rounded-2xl w-[429px] h-[184px] text-center shadow-xl">
-        <h2 className="text-lg font-semibold mb-4 text-[#18181B]">
+        <h2 className="text-lg font-semibold mb-4 text-[#404040]">
           You need to log in first
         </h2>
 

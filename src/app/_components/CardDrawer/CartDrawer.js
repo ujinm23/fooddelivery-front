@@ -7,15 +7,22 @@ import { orderApi } from "@/lib/api";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import LoginModal from "../LoginModal/LoginModal";
+import { Empty } from "../empty";
 
 export default function CartDrawer({
   isOpen,
   onClose,
   orders: externalOrders,
 }) {
-  const { cartItems, updateQuantity, removeFromCart, clearCart, getTotalPrice } = useCart();
+  const {
+    cartItems,
+    updateQuantity,
+    removeFromCart,
+    clearCart,
+    getTotalPrice,
+  } = useCart();
   const { user, getUserId, isAuthenticated } = useAuth();
-  
+
   const [activeTab, setActiveTab] = useState("cart");
   // Initialize from prop, but state will be managed independently
   const [orders, setOrders] = useState(() => externalOrders || []);
@@ -24,7 +31,6 @@ export default function CartDrawer({
   const [isMounted, setIsMounted] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  
   useEffect(() => {
     setIsMounted(true);
   }, []);
@@ -55,7 +61,6 @@ export default function CartDrawer({
   const totalPrice = (itemsTotal + shippingFee).toFixed(2);
 
   const handleCheckout = async () => {
-    
     if (isProcessing) {
       return;
     }
@@ -117,7 +122,7 @@ export default function CartDrawer({
 
   return (
     <div
-      className={`fixed p-3 sm:p-4 md:p-7 top-0 right-0 h-full w-full sm:w-[90%] sm:max-w-[500px] lg:w-[535px] lg:max-w-[535px] rounded-3xl bg-[#3A3A3C]/80 backdrop-blur-sm z-50 transition-transform duration-300
+      className={`fixed p-3 sm:p-4 md:p-7 top-0 right-0 h-full w-full sm:w-[90%] sm:max-w-[500px] lg:w-[535px] lg:max-w-[535px] rounded-3xl bg-[#404040]  z-50 transition-transform duration-300
       ${isOpen ? "translate-x-0" : "translate-x-full"}`}
     >
       <div className="flex flex-col h-full gap-1">
@@ -143,7 +148,7 @@ export default function CartDrawer({
               className={`flex-1 px-4 py-2 rounded-full ${
                 activeTab === "cart"
                   ? "bg-[#EF4444] text-white"
-                  : "text-[#18181B]"
+                  : "text-[#404040]"
               }`}
             >
               Cart
@@ -154,7 +159,7 @@ export default function CartDrawer({
               className={`flex-1 px-4 py-2 rounded-full ${
                 activeTab === "orders"
                   ? "bg-[#EF4444] text-white"
-                  : "text-[#18181B]"
+                  : "text-[#404040]"
               }`}
             >
               Order
@@ -165,12 +170,17 @@ export default function CartDrawer({
         {activeTab === "cart" && (
           <>
             <div className="bg-white flex-1 h-[200px] p-1 sm:p-4 md:p-5 rounded-2xl flex flex-col mb-1 overflow-hidden min-h-0">
-              <h3 className="font-semibold text-[#18181B] mb-3 sm:mb-4 text-sm sm:text-base flex-shrink-0">My cart</h3>
+              <h3 className="font-semibold text-[#404040] mb-3 sm:mb-4 text-sm sm:text-base flex-shrink-0">
+                My cart
+              </h3>
 
               <div className="flex-1 overflow-y-auto rounded-2xl min-h-0 pr-1">
                 {cartItems.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center h-full text-gray-500 py-6">
-                    <p className="text-sm">Сагс хоосон байна</p>
+                  <div className="flex flex-col items-center text-center justify-center h-full text-gray-500 py-6">
+                    <Empty
+                      title="Your cart is empty"
+                      description="Hungry? 🍔 Add some delicious dishes to your cart and satisfy your cravings!"
+                    />
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -252,10 +262,10 @@ export default function CartDrawer({
             </div>
 
             <div className="bg-white rounded-2xl p-1 sm:p-4 md:p-5 flex-shrink-0">
-           
-
               <div className=" border-gray-200 pt-1">
-                <p className="font-medium text-[#18181B] mb-1 text-xs sm:text-sm">Payment info</p>
+                <p className="font-medium text-[#404040] mb-1 text-xs sm:text-sm">
+                  Payment info
+                </p>
                 <div className="flex justify-between text-xs mb-1">
                   <span>Items</span>
                   <span>${itemsTotal.toFixed(2)}</span>
@@ -269,17 +279,17 @@ export default function CartDrawer({
                   <span>${totalPrice}</span>
                 </div>
 
-              <button
-                onClick={handleCheckout}
-                disabled={isProcessing}
-                className={`w-full py-2 sm:py-3 rounded-full text-sm sm:text-base cursor-pointer transition-colors ${
-                  isProcessing
-                    ? "bg-gray-400 text-white cursor-not-allowed"
-                    : "bg-[#EF4444] text-white hover:bg-[#dc2626]"
-                }`}
-              >
-                {isProcessing ? "Processing..." : "Checkout"}
-              </button>
+                <button
+                  onClick={handleCheckout}
+                  disabled={isProcessing}
+                  className={`w-full py-2 sm:py-3 rounded-full text-sm sm:text-base cursor-pointer transition-colors ${
+                    isProcessing
+                      ? "bg-gray-400 text-white cursor-not-allowed"
+                      : "bg-[#EF4444] text-white hover:bg-[#dc2626]"
+                  }`}
+                >
+                  {isProcessing ? "Processing..." : "Checkout"}
+                </button>
               </div>
             </div>
           </>
